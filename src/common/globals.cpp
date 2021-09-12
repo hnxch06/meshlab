@@ -68,6 +68,21 @@ QString meshlab::defaultPluginPath()
 #endif
 	if (pluginsDir.exists("PlugIns")){
 		pluginsDir.cd("PlugIns");
+#ifdef NDEBUG
+        if (pluginsDir.exists("Release"))
+        {
+            pluginsDir.cd("Release");
+        }
+        else if (pluginsDir.exists("MinSizeRel"))
+        {
+            pluginsDir.cd("MinSizeRel");
+        }
+#else
+        if (pluginsDir.exists("Debug"))
+        {
+            pluginsDir.cd("Debug");
+        }
+#endif
 		return pluginsDir.absolutePath();
 	}
 
