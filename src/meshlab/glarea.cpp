@@ -72,6 +72,7 @@ GLArea::GLArea(QWidget *parent, MultiViewer_Container *mvcont, RichParameterList
     takeSnapTile=false;
     activeDefaultTrackball=true;
     infoAreaVisible = true;
+    saAreaVisible = true;
     trackBallVisible = true;
     currentShader = NULL;
     lastFilterRef = NULL;

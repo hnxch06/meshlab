@@ -376,6 +376,7 @@ void MainWindow::updateMenus()
 	showTrackBallAct->setEnabled(activeDoc);
 	resetTrackBallAct->setEnabled(activeDoc);
 	showInfoPaneAct->setEnabled(activeDoc);
+    showSAToolPaneAct->setEnabled(activeDoc);
 	windowsMenu->setEnabled(activeDoc);
 	preferencesMenu->setEnabled(activeDoc);
 	
@@ -410,6 +411,7 @@ void MainWindow::updateMenus()
 		}
 		
 		showInfoPaneAct->setChecked(GLA()->infoAreaVisible);
+        showSAToolPaneAct->setChecked(GLA()->saAreaVisible);
 		showTrackBallAct->setChecked(GLA()->isTrackBallVisible());
 		
 		// Decorator Menu Checking and unChecking
@@ -2574,6 +2576,14 @@ void MainWindow::showInfoPane()
 		GLA()->infoAreaVisible = !(GLA()->infoAreaVisible);
 		GLA()->update();
 	}
+}
+
+void MainWindow::showSAToolPane()
+{
+    if(GLA() != 0) {
+        GLA()->saAreaVisible = !(GLA()->saAreaVisible);
+        GLA()->update();
+    }
 }
 
 void MainWindow::showTrackBall()

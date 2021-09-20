@@ -286,7 +286,10 @@ connectRenderModeActionList(rendlist);*/
 	showInfoPaneAct = new QAction(tr("Show Info &Panel"), this);
 	showInfoPaneAct->setCheckable(true);
 	connect(showInfoPaneAct, SIGNAL(triggered()), this, SLOT(showInfoPane()));
-
+    
+    showSAToolPaneAct = new QAction(tr("Show SATool &Panel"), this);
+    showSAToolPaneAct->setCheckable(true);
+    connect(showSAToolPaneAct, SIGNAL(triggered()), this, SLOT(showSAToolPane()));
 
 	showTrackBallAct = new QAction(tr("Show &Trackball"), this);
 	showTrackBallAct->setCheckable(true);
@@ -615,6 +618,7 @@ void MainWindow::createMenus()
 	viewMenu->addAction(toggleOrthoAct);
 	viewMenu->addSeparator();
 	viewMenu->addAction(showInfoPaneAct);
+    viewMenu->addAction(showSAToolPaneAct);
 	viewMenu->addSeparator();
 	toolBarMenu = viewMenu->addMenu(tr("&ToolBars"));
 	toolBarMenu->addAction(showToolbarStandardAct);
@@ -624,6 +628,8 @@ void MainWindow::createMenus()
 	windowsMenu = menuBar()->addMenu(tr("&Windows"));
 	windowsMenu->setToolTipsVisible(true);
 	updateWindowMenu();
+    windowsMenu->addSeparator();
+//    windowMe
 	menuBar()->addSeparator();
 
 	//////////////////// Menu Preferences /////////////////////////////////////////////////////////////////////

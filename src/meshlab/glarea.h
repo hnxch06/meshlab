@@ -400,6 +400,7 @@ public slots:
 public:
     vcg::Point3f getViewDir();
     bool	infoAreaVisible;		// Draws the lower info area ?
+    bool    saAreaVisible;
     bool  suspendedEditor;
 protected:
 
