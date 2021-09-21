@@ -192,7 +192,6 @@ private slots:
 	void fullScreen();
 	void showToolbarFile();
 	void showInfoPane();
-    void showSAToolPane();
 	void showTrackBall();
 	void resetTrackBall();
 	void showLayerDlg(bool visible);
@@ -437,9 +436,6 @@ private:
 	QAction *fullScreenAct;
 	QAction *showToolbarStandardAct;
 	QAction *showInfoPaneAct;
-    // SATool
-    QAction *showSAToolPaneAct;
-    // SATool end
 	QAction *showTrackBallAct;
 	QAction *resetTrackBallAct;
 	QAction *showLayerDlgAct;
