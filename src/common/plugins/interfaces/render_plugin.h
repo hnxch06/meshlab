@@ -71,6 +71,7 @@ public:
 	 * added to the MeshLab interface)
 	 */
 	virtual void refreshActions() {}
+    virtual void setMainWindow(void* mainWindow) {}
 };
 
 #define RENDER_PLUGIN_IID  "vcg.meshlab.RenderPlugin/1.0"

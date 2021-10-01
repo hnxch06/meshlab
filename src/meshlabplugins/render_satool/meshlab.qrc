@@ -1,0 +1,7 @@
+<RCC>
+    <qresource prefix="/">
+        <file>images/sel_satool.png</file>
+        <file>images/sa_remesh.png</file>
+        <file>images/sa_parameteration.png</file>
+    </qresource>
+</RCC>

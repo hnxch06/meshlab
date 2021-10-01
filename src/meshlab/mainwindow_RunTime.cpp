@@ -1875,6 +1875,22 @@ void MainWindow::updateFilterToolBar()
 			} //else qDebug() << "action was null";
 		}
 	}
+    
+    for(RenderPlugin* iRender: PM.renderPluginIterator())
+    {
+        iRender->setMainWindow(this);
+        
+        for (QAction* renderAction: iRender->actions())
+        {
+            if (!renderAction->icon().isNull())
+            {
+                if (renderAction->priority() == QAction::HighPriority)
+                {
+                    filterToolBar->addAction(renderAction);
+                }
+            }
+        }
+    }
 }
 
 void MainWindow::updateGPUMemBar(int nv_allmem, int nv_currentallocated, int ati_free_tex, int ati_free_vbo)
