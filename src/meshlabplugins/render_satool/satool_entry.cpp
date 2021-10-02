@@ -17,6 +17,8 @@
 #include "../../meshlab/mainwindow.h"
 #include "../../meshlab/glarea.h"
 
+#include "display/DisplayManager.h"
+
 using namespace vcg;
 
 // ERROR CHECKING UTILITY
@@ -46,11 +48,37 @@ void SAToolRenderPlugin::setMainWindow(void* mainWindow)
     this->mainWindow = mainWindow;
 }
 
+void SAToolRenderPlugin::setFrameDocument(MeshDocument &md, MLSceneGLSharedDataContext::PerMeshRenderingDataMap&mp, GLArea *gla)
+{
+    for(const MeshModel& mp : md.meshIterator()) {
+        if (gla->meshVisibilityMap[mp.id()])
+        {
+            sat::DisplayManager::getInstance()->setDisplayModel((void*)(&mp));
+            break;
+        }
+    }
+}
+
+bool SAToolRenderPlugin::hasCustomRenderContent()
+{
+    sat::WorkFlow* workFlow = sat::DisplayManager::getInstance()->getDisplayingWorkFlow();
+    if (workFlow == nullptr) return false;
+    return true;
+}
+
 void SAToolRenderPlugin::init(QAction *a, MeshDocument &md, MLSceneGLSharedDataContext::PerMeshRenderingDataMap&mp, GLArea *gla) {
     if (saDialog) {
         saDialog->close();
         delete saDialog;
         saDialog = nullptr;
+    }
+    
+    for(const MeshModel& mp : md.meshIterator()) {
+        if (gla->meshVisibilityMap[mp.id()])
+        {
+            sat::DisplayManager::getInstance()->setDisplayModel((void*)(&mp));
+            break;
+        }
     }
     
     if (this->mainWindow != nullptr)
@@ -69,7 +97,6 @@ void SAToolRenderPlugin::init(QAction *a, MeshDocument &md, MLSceneGLSharedDataC
 }
 void SAToolRenderPlugin::render(QAction *a, MeshDocument &md, MLSceneGLSharedDataContext::PerMeshRenderingDataMap&mp, GLArea *gla)
 {
-    
 }
 void SAToolRenderPlugin::finalize(QAction * a, MeshDocument *md, GLArea *gla)
 {

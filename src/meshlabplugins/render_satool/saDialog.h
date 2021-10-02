@@ -35,6 +35,8 @@
 #include <QSlider>
 #include <QSignalMapper>
 
+#include "display/DisplayManager.h"
+
 class QGLWidget;
 class QTreeWidget;
 
@@ -43,7 +45,6 @@ class WorkFlowWidgetItem : public QTreeWidgetItem
 public:
     WorkFlowWidgetItem(void* factory);
     ~WorkFlowWidgetItem();
-    void updateIcon();
     
 public:
     void* factory;
@@ -58,6 +59,9 @@ public:
 	~SADialog();
     
     void initSupportWorkFlow();
+    
+public:
+    void workFlowChangedListener(sat::WorkFlow* from, sat::WorkFlow* to);
 
 private:
 	QGLWidget* glarea;

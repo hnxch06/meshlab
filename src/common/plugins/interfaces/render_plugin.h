@@ -71,7 +71,11 @@ public:
 	 * added to the MeshLab interface)
 	 */
 	virtual void refreshActions() {}
+    
+    // support for satool plugin
     virtual void setMainWindow(void* mainWindow) {}
+    virtual void setFrameDocument( MeshDocument &, MLSceneGLSharedDataContext::PerMeshRenderingDataMap& mp, GLArea *) {};
+    virtual bool hasCustomRenderContent() { return true; }
 };
 
 #define RENDER_PLUGIN_IID  "vcg.meshlab.RenderPlugin/1.0"

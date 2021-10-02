@@ -415,6 +415,8 @@ int GLArea::RenderForSelection(int pickX, int pickY)
     return H.front().second;
 }
 
+
+
 void GLArea::paintEvent(QPaintEvent* /*event*/)
 {
     if (mvc() == NULL)
@@ -463,16 +465,38 @@ void GLArea::paintEvent(QPaintEvent* /*event*/)
     {
         glPushAttrib(GL_ALL_ATTRIB_BITS);
         
+        // for satool plugin begin
+        MLSceneGLSharedDataContext::PerMeshRenderingDataMap dt;
         
         if ((iRenderer) && (parentmultiview != NULL))
         {
             MLSceneGLSharedDataContext* shared = parentmultiview->sharedDataContext();
             if (shared != NULL)
             {
-                MLSceneGLSharedDataContext::PerMeshRenderingDataMap dt;
                 shared->getRenderInfoPerMeshView(context(),dt);
+                iRenderer->setFrameDocument(*this->md(),dt,this);
+            }
+        }
+        // for satool plugin end
+        
+        if ((iRenderer) && (iRenderer->hasCustomRenderContent()) && (parentmultiview != NULL))
+        {
+            MLSceneGLSharedDataContext* shared = parentmultiview->sharedDataContext();
+            if (shared != NULL)
+            {
+                //for satool plugin begin
+//                MLSceneGLSharedDataContext::PerMeshRenderingDataMap dt;
+//                shared->getRenderInfoPerMeshView(context(),dt);
+                //for satool plugin end
 
                 iRenderer->render(currentShader, *this->md(),dt,this);
+                
+                //for satool plugin begin
+                {
+                    MLSceneGLSharedDataContext::PerMeshRenderingDataMap empty;
+                    dt.swap(empty);
+                }
+                //for satool plugin end
 
                 MLDefaultMeshDecorators defdec(mw());
 

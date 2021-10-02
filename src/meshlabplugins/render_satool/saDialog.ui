@@ -43,12 +43,17 @@
       </attribute>
       <column>
        <property name="text">
-        <string notr="true">SA Work Flow</string>
+        <string notr="true">WorkFlow</string>
        </property>
       </column>
         <column>
          <property name="text">
-          <string>name</string>
+          <string>Name</string>
+         </property>
+        </column>
+        <column>
+         <property name="text">
+          <string>View</string>
          </property>
         </column>
      </widget>

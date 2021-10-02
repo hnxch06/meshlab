@@ -25,6 +25,9 @@ public:
     
     void setMainWindow(void* mainWindow);
     
+    void setFrameDocument( MeshDocument &, MLSceneGLSharedDataContext::PerMeshRenderingDataMap& mp, GLArea *);
+    bool hasCustomRenderContent();
+    
 private:
     SADialog* saDialog;
     QList <QAction *> actionList;

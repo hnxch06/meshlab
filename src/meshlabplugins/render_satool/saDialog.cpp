@@ -1,25 +1,4 @@
-/****************************************************************************
-* MeshLab                                                           o o     *
-* An extendible mesh processor                                    o     o   *
-*                                                                _   O  _   *
-* Copyright(C) 2005, 2009                                          \/)\/    *
-* Visual Computing Lab                                            /\/|      *
-* ISTI - Italian National Research Council                           |      *
-*                                                                    \      *
-* All rights reserved.                                                      *
-*                                                                           *
-* This program is free software; you can redistribute it and/or modify      *
-* it under the terms of the GNU General Public License as published by      *
-* the Free Software Foundation; either version 2 of the License, or         *
-* (at your option) any later version.                                       *
-*                                                                           *
-* This program is distributed in the hope that it will be useful,           *
-* but WITHOUT ANY WARRANTY; without even the implied warranty of            *
-* MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the             *
-* GNU General Public License (http://www.gnu.org/licenses/gpl.txt)          *
-* for more details.                                                         *
-*                                                                           *
-****************************************************************************/
+// free icon https://www.iconpacks.net/free-icon/rocket-3420.html
 
 #include "saDialog.h"
 #include <QTextStream>
@@ -63,6 +42,8 @@ SADialog::SADialog(QGLWidget* gla, QWidget *parent)
 
 SADialog::~SADialog()
 {
+    sat::DisplayManager::getInstance()->removeWorkFlowChangedListener(this);
+    
     if (ui != NULL)
     {
         delete ui;
@@ -70,17 +51,34 @@ SADialog::~SADialog()
     }
 }
 
+void SADialog::workFlowChangedListener(sat::WorkFlow* from, sat::WorkFlow* to)
+{
+    if (glarea != NULL)
+    {
+        glarea->repaint();
+    }
+}
+
 void SADialog::initSupportWorkFlow()
 {
+    WorkFlowWidgetItem* item = new WorkFlowWidgetItem(NULL);
+    item->setIcon(0, QIcon(":/images/convert-3217.png"));
+    ui->workFlowTreeWidget->addTopLevelItem(item);
+    
     std::vector<sat::WorkFlowFactory*> workflowFactories = sat::meshlab::supportedWorkFlows();
     for (int i = 0, in = workflowFactories.size(); i < in; i++)
     {
         sat::WorkFlowFactory* factory = workflowFactories[i];
         
         WorkFlowWidgetItem* item = new WorkFlowWidgetItem(factory);
+        item->setIcon(0, QIcon(":/images/start.png"));
         item->setText(1, tr(factory->getWorkFlowName()));
+        item->setIcon(2, QIcon(":/images/view.png"));
         ui->workFlowTreeWidget->addTopLevelItem(item);
     }
+    
+    std::function<void(sat::WorkFlow*, sat::WorkFlow*)> fn = std::bind(&SADialog::workFlowChangedListener , this, std::placeholders::_1, std::placeholders::_2);
+    sat::DisplayManager::getInstance()->addWorkFlowChangedListener(this, fn);
 }
 
 void SADialog::workFlowClicked (QTreeWidgetItem * item , int col)
@@ -88,12 +86,36 @@ void SADialog::workFlowClicked (QTreeWidgetItem * item , int col)
     if(item)
     {
         WorkFlowWidgetItem* workFlowItem = dynamic_cast<WorkFlowWidgetItem*>(item);
-        sat::WorkFlowFactory* factory = (sat::WorkFlowFactory*)workFlowItem->factory;
-        sat::WorkFlow* workFlow = factory->create();
-        printf("%ld\n", workFlow);
-        printf("%d\n", col);
+        if (workFlowItem->factory == nullptr)
+        {
+            sat::DisplayManager::getInstance()->activeWorkFlow(nullptr);
+            return;
+        }
         
-        delete workFlow;
+        if (col == 0)
+        {
+            void* model = sat::DisplayManager::getInstance()->getDisplayModel();
+            if (model == nullptr)
+            {
+                printf("no model selected\n");
+                return;
+            }
+            
+            WorkFlowWidgetItem* workFlowItem = dynamic_cast<WorkFlowWidgetItem*>(item);
+            sat::WorkFlowFactory* factory = (sat::WorkFlowFactory*)workFlowItem->factory;
+            sat::WorkFlow* workFlow = factory->create();
+            
+            sat::WorkFlowSharedData inputData;
+            inputData.setRef(NULL, sat::deleteShareData);
+            workFlow->addSharedData(workFlow->getInputLabel(), inputData);
+            workFlow->execute();
+            
+            sat::DisplayManager::getInstance()->addWorkFlow(item, workFlow);
+            sat::DisplayManager::getInstance()->activeWorkFlow(item);
+        } else
+        {
+            sat::DisplayManager::getInstance()->activeWorkFlow(item);
+        }
     }
 }
 
@@ -121,13 +143,8 @@ void SADialog::updateTreeWidgetSizes(void* vtree)
 WorkFlowWidgetItem::WorkFlowWidgetItem(void* factory)
 {
     this->factory = factory;
-    this->updateIcon();
 }
 WorkFlowWidgetItem::~WorkFlowWidgetItem()
 {
     
-}
-void WorkFlowWidgetItem::updateIcon()
-{
-    setIcon(0,QIcon(":/images/sa_parameteration.png"));
 }
