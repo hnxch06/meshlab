@@ -1747,6 +1747,10 @@ bool MainWindow::openProject(QString fileName, bool append)
 	saveRecentProjectList(fileName);
 	globrendtoolbar->setEnabled(true);
 	showLayerDlg(visiblelayer || (meshDoc()->meshNumber() > 0));
+    
+    // satool begin
+    // init satool
+    // satool end
 	
 	return true;
 }

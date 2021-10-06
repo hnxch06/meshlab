@@ -11,6 +11,7 @@
 #include <QCheckBox>
 #include <QPushButton>
 #include "MeshLabWorkFlow.h"
+#include "sadelegate.h"
 
 #define DECFACTOR 100000.0f
 
@@ -106,12 +107,18 @@ void SADialog::workFlowClicked (QTreeWidgetItem * item , int col)
             sat::WorkFlow* workFlow = factory->create();
             
             sat::WorkFlowSharedData inputData;
-            inputData.setRef(NULL, sat::deleteShareData);
-            workFlow->addSharedData(workFlow->getInputLabel(), inputData);
-            workFlow->execute();
-            
-            sat::DisplayManager::getInstance()->addWorkFlow(item, workFlow);
-            sat::DisplayManager::getInstance()->activeWorkFlow(item);
+            void* currentMesh = sat::DisplayManager::getInstance()->getDisplayModel();
+            if (currentMesh != nullptr)
+            {
+                MeshModel* mp = (MeshModel*)currentMesh;
+                sat::Model* model = SAUtil::convertMeshFromMeshlabToSAGeo(mp);
+                inputData.setRef(model, sat::deleteShareData);
+                workFlow->addSharedData(workFlow->getInputLabel(), inputData);
+                workFlow->executeFrame();
+                
+                sat::DisplayManager::getInstance()->addWorkFlow(item, workFlow);
+                sat::DisplayManager::getInstance()->activeWorkFlow(item);
+            }
         } else
         {
             sat::DisplayManager::getInstance()->activeWorkFlow(item);
