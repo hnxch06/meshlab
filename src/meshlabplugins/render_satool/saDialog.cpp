@@ -106,18 +106,16 @@ void SADialog::workFlowClicked (QTreeWidgetItem * item , int col)
             sat::WorkFlowFactory* factory = (sat::WorkFlowFactory*)workFlowItem->factory;
             sat::WorkFlow* workFlow = factory->create();
             
-            sat::WorkFlowSharedData inputData;
             void* currentMesh = sat::DisplayManager::getInstance()->getDisplayModel();
             if (currentMesh != nullptr)
             {
                 MeshModel* mp = (MeshModel*)currentMesh;
                 sat::Model* model = SAUtil::convertMeshFromMeshlabToSAGeo(mp);
-                inputData.setRef(model, sat::deleteShareData);
-                workFlow->getSharedContext().addData(workFlow->getInputLabel(), inputData);
-                workFlow->executeFrame();
-                
+                workFlow->getSharedContext().addRef(workFlow->getInputLabel(), model, sat::deleteShareData<sat::Model>);
                 sat::DisplayManager::getInstance()->addWorkFlow(item, workFlow);
                 sat::DisplayManager::getInstance()->activeWorkFlow(item);
+                
+                workFlow->executeFrame();
             }
         } else
         {

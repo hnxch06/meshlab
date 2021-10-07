@@ -1,306 +1,200 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <ui version="4.0">
- <class>SADialogClass</class>
- <widget class="QDockWidget" name="SADialogClass">
-  <property name="geometry">
-   <rect>
-    <x>0</x>
-    <y>0</y>
-    <width>426</width>
-    <height>816</height>
-   </rect>
-  </property>
-  <property name="sizePolicy">
-   <sizepolicy hsizetype="Expanding" vsizetype="Expanding">
-    <horstretch>0</horstretch>
-    <verstretch>0</verstretch>
-   </sizepolicy>
-  </property>
-  <property name="windowTitle">
-   <string>SATool</string>
-  </property>
-  <widget class="QWidget" name="dockWidgetContents">
-   <layout class="QVBoxLayout" name="verticalLayout">
-    <item>
-     <widget class="QTreeWidget" name="workFlowTreeWidget">
-      <property name="sizePolicy">
-       <sizepolicy hsizetype="Expanding" vsizetype="MinimumExpanding">
-        <horstretch>0</horstretch>
-        <verstretch>2</verstretch>
-       </sizepolicy>
-      </property>
-      <property name="sizeIncrement">
-       <size>
-        <width>0</width>
-        <height>1</height>
-       </size>
-      </property>
-      <property name="indentation">
-       <number>10</number>
-      </property>
-      <attribute name="headerStretchLastSection">
-       <bool>false</bool>
-      </attribute>
-      <column>
-       <property name="text">
-        <string notr="true">WorkFlow</string>
-       </property>
-      </column>
-        <column>
-         <property name="text">
-          <string>Name</string>
-         </property>
-        </column>
-        <column>
-         <property name="text">
-          <string>View</string>
-         </property>
-        </column>
-     </widget>
-    </item>
-    <item>
-     <layout class="QVBoxLayout" name="verticalLayout_2">
-      <item>
-       <layout class="QHBoxLayout" name="horizontalLayout">
-        <item>
-         <widget class="QToolButton" name="bW1">
-          <property name="font">
-           <font>
-            <pointsize>9</pointsize>
-            <weight>75</weight>
-            <italic>false</italic>
-            <bold>true</bold>
-           </font>
-          </property>
-          <property name="toolTip">
-           <string>CTRL-click to store view, click to recall</string>
-          </property>
-          <property name="text">
-           <string>1</string>
-          </property>
-         </widget>
-        </item>
-        <item>
-         <widget class="QToolButton" name="bW2">
-          <property name="font">
-           <font>
-            <pointsize>9</pointsize>
-            <weight>75</weight>
-            <bold>true</bold>
-           </font>
-          </property>
-          <property name="toolTip">
-           <string>CTRL-click to store view, click to recall</string>
-          </property>
-          <property name="text">
-           <string>2</string>
-          </property>
-         </widget>
-        </item>
-        <item>
-         <widget class="QToolButton" name="bW3">
-          <property name="font">
-           <font>
-            <pointsize>9</pointsize>
-            <weight>75</weight>
-            <bold>true</bold>
-           </font>
-          </property>
-          <property name="toolTip">
-           <string>CTRL-click to store view, click to recall</string>
-          </property>
-          <property name="text">
-           <string>3</string>
-          </property>
-         </widget>
-        </item>
-        <item>
-         <widget class="QToolButton" name="bW4">
-          <property name="font">
-           <font>
-            <pointsize>9</pointsize>
-            <weight>75</weight>
-            <bold>true</bold>
-           </font>
-          </property>
-          <property name="toolTip">
-           <string>CTRL-click to store view, click to recall</string>
-          </property>
-          <property name="text">
-           <string>4</string>
-          </property>
-         </widget>
-        </item>
-        <item>
-         <spacer name="horizontalSpacer">
-          <property name="orientation">
-           <enum>Qt::Horizontal</enum>
-          </property>
-          <property name="sizeHint" stdset="0">
-           <size>
-            <width>40</width>
-            <height>20</height>
-           </size>
-          </property>
-         </spacer>
-        </item>
-        <item>
-         <widget class="QToolButton" name="bV1">
-          <property name="font">
-           <font>
-            <pointsize>9</pointsize>
-            <weight>75</weight>
-            <bold>true</bold>
-           </font>
-          </property>
-          <property name="toolTip">
-           <string>CTRL-click to store layer visibility, click to recall</string>
-          </property>
-          <property name="text">
-           <string>1</string>
-          </property>
-         </widget>
-        </item>
-        <item>
-         <widget class="QToolButton" name="bV2">
-          <property name="font">
-           <font>
-            <pointsize>9</pointsize>
-            <weight>75</weight>
-            <bold>true</bold>
-           </font>
-          </property>
-          <property name="toolTip">
-           <string>CTRL-click to store layer visibility, click to recall</string>
-          </property>
-          <property name="text">
-           <string>2</string>
-          </property>
-         </widget>
-        </item>
-        <item>
-         <widget class="QToolButton" name="bV3">
-          <property name="font">
-           <font>
-            <pointsize>9</pointsize>
-            <weight>75</weight>
-            <bold>true</bold>
-           </font>
-          </property>
-          <property name="toolTip">
-           <string>CTRL-click to store layer visibility, click to recall</string>
-          </property>
-          <property name="text">
-           <string>3</string>
-          </property>
-         </widget>
-        </item>
-        <item>
-         <widget class="QToolButton" name="bV4">
-          <property name="font">
-           <font>
-            <pointsize>9</pointsize>
-            <weight>75</weight>
-            <bold>true</bold>
-           </font>
-          </property>
-          <property name="toolTip">
-           <string>CTRL-click to store layer visibility, click to recall</string>
-          </property>
-          <property name="text">
-           <string>4</string>
-          </property>
-         </widget>
-        </item>
-       </layout>
-      </item>
-     </layout>
-    </item>
-    <item>
-     <layout class="QVBoxLayout" name="renderingLayout"/>
-    </item>
-    <item>
-     <layout class="QVBoxLayout" name="rasterLayout">
-      <item>
-       <widget class="QTreeWidget" name="rasterTreeWidget">
+    <class>SADialogClass</class>
+    <widget class="QDockWidget" name="SADialogClass">
+        <property name="geometry">
+            <rect>
+                <x>0</x>
+                <y>0</y>
+                <width>426</width>
+                <height>816</height>
+            </rect>
+        </property>
         <property name="sizePolicy">
-         <sizepolicy hsizetype="Expanding" vsizetype="Ignored">
-          <horstretch>0</horstretch>
-          <verstretch>1</verstretch>
-         </sizepolicy>
+            <sizepolicy hsizetype="Expanding" vsizetype="Expanding">
+                <horstretch>0</horstretch>
+                <verstretch>0</verstretch>
+            </sizepolicy>
         </property>
-        <property name="indentation">
-         <number>10</number>
+        <property name="windowTitle">
+            <string>SATool</string>
         </property>
-        <property name="columnCount">
-         <number>3</number>
-        </property>
-        <attribute name="headerStretchLastSection">
-         <bool>false</bool>
-        </attribute>
-        <column>
-         <property name="text">
-          <string notr="true">1</string>
-         </property>
-        </column>
-        <column>
-         <property name="text">
-          <string notr="true">2</string>
-         </property>
-        </column>
-        <column>
-         <property name="text">
-          <string notr="true">3</string>
-         </property>
-        </column>
-       </widget>
-      </item>
-     </layout>
-    </item>
-    <item>
-     <layout class="QVBoxLayout" name="subLayout">
-      <item>
-       <widget class="QTreeWidget" name="decParsTree">
-        <property name="sizePolicy">
-         <sizepolicy hsizetype="Expanding" vsizetype="Ignored">
-          <horstretch>0</horstretch>
-          <verstretch>0</verstretch>
-         </sizepolicy>
-        </property>
-        <property name="verticalScrollMode">
-         <enum>QAbstractItemView::ScrollPerPixel</enum>
-        </property>
-        <property name="indentation">
-         <number>10</number>
-        </property>
-        <attribute name="headerVisible">
-         <bool>false</bool>
-        </attribute>
-        <column>
-         <property name="text">
-          <string notr="true">1</string>
-         </property>
-        </column>
-       </widget>
-      </item>
-     </layout>
-    </item>
-    <item>
-     <widget class="QPlainTextEdit" name="logPlainTextEdit">
-      <property name="sizePolicy">
-       <sizepolicy hsizetype="Expanding" vsizetype="Expanding">
-        <horstretch>0</horstretch>
-        <verstretch>1</verstretch>
-       </sizepolicy>
-      </property>
-      <property name="textInteractionFlags">
-       <set>Qt::LinksAccessibleByMouse|Qt::TextSelectableByKeyboard|Qt::TextSelectableByMouse</set>
-      </property>
-     </widget>
-    </item>
-   </layout>
-  </widget>
- </widget>
- <resources/>
- <connections/>
+        <widget class="QWidget" name="dockWidgetContents">
+            <layout class="QVBoxLayout" name="verticalLayout">
+                <item>
+                    <layout class="QHBoxLayout" name="horizontalLayout">
+                        <item row="0" column="0">
+                            <widget class="QCheckBox" name="frameExecuteCheckBox">
+                                <property name="layoutDirection">
+                                    <enum>Qt::LeftToRight</enum>
+                                </property>
+                                <property name="text">
+                                    <string>If ExecuteFrame: </string>
+                                </property>
+                                <property name="checked">
+                                    <bool>true</bool>
+                                </property>
+                            </widget>
+                        </item>
+                        <item>
+                            <widget class="QLineEdit" name="frameExecuteText">
+                                <property name="sizePolicy">
+                                    <sizepolicy hsizetype="Expanding" vsizetype="Expanding">
+                                        <horstretch>0</horstretch>
+                                        <verstretch>1</verstretch>
+                                    </sizepolicy>
+                                </property>
+                                <property name="font">
+                                    <font>
+                                        <family>Courier</family>
+                                        <pointsize>9</pointsize>
+                                    </font>
+                                </property>
+                                <property name="readOnly">
+                                    <bool>false</bool>
+                                </property>
+                            </widget>
+                        </item>
+                    </layout>
+                </item>
+                <item>
+                    <widget class="QTreeWidget" name="workFlowTreeWidget">
+                        <property name="sizePolicy">
+                            <sizepolicy hsizetype="Expanding" vsizetype="MinimumExpanding">
+                                <horstretch>0</horstretch>
+                                <verstretch>2</verstretch>
+                            </sizepolicy>
+                        </property>
+                        <property name="sizeIncrement">
+                            <size>
+                                <width>0</width>
+                                <height>1</height>
+                            </size>
+                        </property>
+                        <property name="indentation">
+                            <number>10</number>
+                        </property>
+                        <attribute name="headerStretchLastSection">
+                            <bool>false</bool>
+                        </attribute>
+                        <column>
+                            <property name="text">
+                                <string notr="true">WorkFlow</string>
+                            </property>
+                        </column>
+                        <column>
+                            <property name="text">
+                                <string>Name</string>
+                            </property>
+                        </column>
+                        <column>
+                            <property name="text">
+                                <string>View</string>
+                            </property>
+                        </column>
+                    </widget>
+                </item>
+                <item>
+                    <layout class="QVBoxLayout" name="verticalLayout_2">
+                        <item>
+                            <layout class="QHBoxLayout" name="horizontalLayout">
+                                <item>
+                                    <widget class="QToolButton" name="bW1">
+                                        <property name="font">
+                                            <font>
+                                                <pointsize>14</pointsize>
+                                                <weight>75</weight>
+                                                <italic>false</italic>
+                                                <bold>true</bold>
+                                            </font>
+                                        </property>
+                                        <property name="toolTip">
+                                            <string>Selecting WorkFlow Detail</string>
+                                        </property>
+                                        <property name="text">
+                                            <string>Detail</string>
+                                        </property>
+                                    </widget>
+                                </item>
+                                <item>
+                                    <spacer name="horizontalSpacer">
+                                        <property name="orientation">
+                                            <enum>Qt::Horizontal</enum>
+                                        </property>
+                                        <property name="sizeHint" stdset="0">
+                                            <size>
+                                                <width>40</width>
+                                                <height>20</height>
+                                            </size>
+                                        </property>
+                                    </spacer>
+                                </item>
+                                <item>
+                                    <widget class="QToolButton" name="bV4">
+                                        <property name="font">
+                                            <font>
+                                                <pointsize>9</pointsize>
+                                                <weight>75</weight>
+                                                <bold>true</bold>
+                                            </font>
+                                        </property>
+                                        <property name="toolTip">
+                                            <string></string>
+                                        </property>
+                                        <property name="text">
+                                            <string></string>
+                                        </property>
+                                        <property name="icon">
+                                            <iconset resource="meshlab.qrc">
+                                                <normaloff>:/images/convert-3217.png</normaloff>:/images/convert-3217.png
+                                            </iconset>
+                                        </property>
+                                    </widget>
+                                </item>
+                            </layout>
+                        </item>
+                    </layout>
+                </item>
+                <item>
+                    <widget class="QTreeWidget" name="selectWorkFlowJobTreeWidget">
+                        <property name="sizePolicy">
+                            <sizepolicy hsizetype="Expanding" vsizetype="MinimumExpanding">
+                                <horstretch>0</horstretch>
+                                <verstretch>2</verstretch>
+                            </sizepolicy>
+                        </property>
+                        <property name="sizeIncrement">
+                            <size>
+                                <width>0</width>
+                                <height>1</height>
+                            </size>
+                        </property>
+                        <property name="indentation">
+                            <number>10</number>
+                        </property>
+                        <attribute name="headerStretchLastSection">
+                            <bool>false</bool>
+                        </attribute>
+                        <column>
+                            <property name="text">
+                                <string notr="true">Status</string>
+                            </property>
+                        </column>
+                        <column>
+                            <property name="text">
+                                <string notr="true">Name</string>
+                            </property>
+                        </column>
+                        <column>
+                            <property name="text">
+                                <string>Info</string>
+                            </property>
+                        </column>
+                    </widget>
+                </item>
+            </layout>
+        </widget>
+    </widget>
+    <resources/>
+    <connections/>
 </ui>

@@ -6,6 +6,7 @@ sat::Model* SAUtil::convertMeshFromMeshlabToSAGeo(MeshModel* meshModel)
     sat::Model* model = new sat::Model();
     
     sat::Mesh mesh;
+    mesh.withColor = false;
     mesh.name = meshModel->shortName().toStdString();
     
     int vSize = meshModel->cm.VertexNumber();
@@ -15,9 +16,9 @@ sat::Model* SAUtil::convertMeshFromMeshlabToSAGeo(MeshModel* meshModel)
     {
         auto& v = meshModel->cm.vert[i];
         sat::Vertex satV;
-        satV.x = v.P().X();
-        satV.y = v.P().Y();
-        satV.z = v.P().Z();
+        satV.pos(0) = v.P().X();
+        satV.pos(1) = v.P().Y();
+        satV.pos(2) = v.P().Z();
         
 //        if (v.vcg::vertex::EmptyCore<CUsedTypesO>::HasTexCoord())
 //        {
