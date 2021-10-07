@@ -113,7 +113,7 @@ void SADialog::workFlowClicked (QTreeWidgetItem * item , int col)
                 MeshModel* mp = (MeshModel*)currentMesh;
                 sat::Model* model = SAUtil::convertMeshFromMeshlabToSAGeo(mp);
                 inputData.setRef(model, sat::deleteShareData);
-                workFlow->addSharedData(workFlow->getInputLabel(), inputData);
+                workFlow->getSharedContext().addData(workFlow->getInputLabel(), inputData);
                 workFlow->executeFrame();
                 
                 sat::DisplayManager::getInstance()->addWorkFlow(item, workFlow);
