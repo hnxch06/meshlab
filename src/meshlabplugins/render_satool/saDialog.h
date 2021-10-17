@@ -50,6 +50,16 @@ public:
     void* factory;
 };
 
+class JobWidgetItem : public QTreeWidgetItem
+{
+public:
+    JobWidgetItem(void* job);
+    ~JobWidgetItem();
+    
+public:
+    void* job;
+};
+
 class SADialog : public QDockWidget
 {
     Q_OBJECT
@@ -60,12 +70,15 @@ public:
     
     void initSupportWorkFlow();
     
+    void timerEvent(QTimerEvent *);
+    
 public:
-    void workFlowChangedListener(sat::WorkFlow* from, sat::WorkFlow* to);
+    void workFlowChangedListener(sat::WorkFlow* from, sat::WorkFlow* to, bool refreshUi);
 
 private:
 	QGLWidget* glarea;
 	Ui::SADialogClass* ui;
+    int mFrameTimeID;
     
 private:
     void updateTreeWidgetSizes(void* tree);
@@ -73,6 +86,9 @@ private:
 private slots:
     void workFlowClicked(QTreeWidgetItem * , int );
     void adaptLayout(QTreeWidgetItem * item);
+    void frameExecuteStateChange(int state);
+    void pauseFrame();
+    
 };
 
 #endif

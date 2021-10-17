@@ -6,5 +6,13 @@
         <file>images/start.png</file>
         <file>images/convert-3217.png</file>
         <file>images/view.png</file>
+        <file>images/execute_running.png</file>
+        <file>images/execute_hold.png</file>
+        <file>images/execute_hold1.png</file>
+        <file>images/execute_success.png</file>
+        <file>images/execute_error.png</file>
+        <file>images/execute_error1.png</file>
+        <file>images/execute_cancel.png</file>
+        <file>images/execute_pause.png</file>
     </qresource>
 </RCC>

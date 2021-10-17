@@ -61,7 +61,7 @@ void SAToolRenderPlugin::setFrameDocument(MeshDocument &md, MLSceneGLSharedDataC
 
 bool SAToolRenderPlugin::hasCustomRenderContent()
 {
-    sat::WorkFlow* workFlow = sat::DisplayManager::getInstance()->getDisplayingWorkFlow();
+    std::shared_ptr<sat::WorkFlow> workFlow = sat::DisplayManager::getInstance()->getDisplayingWorkFlow();
     if (workFlow == nullptr) return false;
     return true;
 }

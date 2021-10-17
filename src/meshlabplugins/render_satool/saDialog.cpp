@@ -39,11 +39,16 @@ SADialog::SADialog(QGLWidget* gla, QWidget *parent)
 
     connect(ui->workFlowTreeWidget, SIGNAL(itemExpanded(QTreeWidgetItem * )) , this,  SLOT(adaptLayout(QTreeWidgetItem *)));
     connect(ui->workFlowTreeWidget, SIGNAL(itemCollapsed(QTreeWidgetItem * )) , this,  SLOT(adaptLayout(QTreeWidgetItem *)));
+    connect(ui->frameExecuteCheckBox, SIGNAL(stateChanged(int)), this, SLOT(frameExecuteStateChange(int)));
+    connect(ui->resetPauseFrame, SIGNAL(released()), this, SLOT(pauseFrame()));
+    
+    mFrameTimeID = startTimer(125);
 }
 
 SADialog::~SADialog()
 {
     sat::DisplayManager::getInstance()->removeWorkFlowChangedListener(this);
+    killTimer(mFrameTimeID);
     
     if (ui != NULL)
     {
@@ -52,9 +57,96 @@ SADialog::~SADialog()
     }
 }
 
-void SADialog::workFlowChangedListener(sat::WorkFlow* from, sat::WorkFlow* to)
+void SADialog::timerEvent(QTimerEvent *)
 {
-    if (glarea != NULL)
+    std::shared_ptr<sat::WorkFlow> displaying = sat::DisplayManager::getInstance()->getDisplayingWorkFlow();
+    if (displaying != nullptr && displaying->getAndResetStatusChangeFlag())
+    {
+        workFlowChangedListener(nullptr, displaying.get(), false);
+        if (glarea != NULL)
+        {
+            glarea->repaint();
+        }
+    }
+}
+
+void SADialog::frameExecuteStateChange(int state)
+{
+    std::shared_ptr<sat::WorkFlow> displaying = sat::DisplayManager::getInstance()->getDisplayingWorkFlow();
+    if (displaying != nullptr)
+    {
+        if (state != 0)
+        {
+            int frameCount = ui->frameExecuteText->text().toInt();
+            if (frameCount == 0) frameCount = INT_MAX;
+            displaying->setPauseInFrame(frameCount);
+        } else
+        {
+            displaying->setPauseInFrame(INT_MAX);
+        }
+    }
+}
+
+void SADialog::pauseFrame()
+{
+    std::shared_ptr<sat::WorkFlow> displaying = sat::DisplayManager::getInstance()->getDisplayingWorkFlow();
+    if (displaying != nullptr && displaying->getStatus() == sat::WorkFlow::Status::EXECUTING)
+    {
+        displaying->setPauseInFrame(1);
+    }
+}
+
+void SADialog::workFlowChangedListener(sat::WorkFlow* from, sat::WorkFlow* to, bool refreshUi)
+{
+    ui->selectWorkFlowJobTreeWidget->clear();
+    
+    if (to != nullptr)
+    {
+        sat::WorkFlow* workFlow = to;
+        const sat::Job* eJob = workFlow->executingJob();
+        for (int i = 0, size = workFlow->getJobSize(); i < size; i++)
+        {
+            sat::Job* job = workFlow->getJobAt(i);
+            JobWidgetItem* item = new JobWidgetItem(job);
+            
+            if (job->getStatus() == sat::Job::Status::EXECUTING)
+            {
+                if (workFlow->getStatus() == sat::WorkFlow::Status::EXECUTING)
+                {
+                    item->setIcon(0, QIcon(":/images/execute_running.png"));
+                } else {
+                    item->setIcon(0, QIcon(":/images/execute_pause.png"));
+                }
+            } else if (job->getStatus() == sat::Job::Status::FINISHED)
+            {
+                item->setIcon(0, QIcon(":/images/execute_success.png"));
+            } else if (job->getStatus() == sat::Job::Status::FINISHED_SKIP)
+            {
+                item->setIcon(0, QIcon(":/images/execute_error1.png"));
+            } else if (job->getStatus() == sat::Job::Status::INIT)
+            {
+                item->setIcon(0, QIcon(":/images/execute_hold.png"));
+            } else if (job->getStatus() == sat::Job::Status::ERROR)
+            {
+                item->setIcon(0, QIcon(":/images/execute_error.png"));
+            }
+            
+            if (job == eJob && workFlow->getStatus() == sat::WorkFlow::Status::CANCELLED)
+            {
+                item->setIcon(0, QIcon(":/images/execute_cancel.png"));
+            }
+            
+            if (job == eJob)
+            {
+                item->setBackground(1, QBrush(QColor("#666600")));
+            }
+            item->setText(1, tr(job->getName()));
+            item->setIcon(2, QIcon(":/images/view.png"));
+            ui->selectWorkFlowJobTreeWidget->addTopLevelItem(item);
+        }
+    }
+    
+    if (refreshUi && glarea != NULL)
     {
         glarea->repaint();
     }
@@ -78,7 +170,7 @@ void SADialog::initSupportWorkFlow()
         ui->workFlowTreeWidget->addTopLevelItem(item);
     }
     
-    std::function<void(sat::WorkFlow*, sat::WorkFlow*)> fn = std::bind(&SADialog::workFlowChangedListener , this, std::placeholders::_1, std::placeholders::_2);
+    std::function<void(sat::WorkFlow*, sat::WorkFlow*)> fn = std::bind(&SADialog::workFlowChangedListener, this, std::placeholders::_1, std::placeholders::_2, true);
     sat::DisplayManager::getInstance()->addWorkFlowChangedListener(this, fn);
 }
 
@@ -93,34 +185,48 @@ void SADialog::workFlowClicked (QTreeWidgetItem * item , int col)
             return;
         }
         
-        if (col == 0)
+        void* currentMesh = sat::DisplayManager::getInstance()->getDisplayModel();
+        
+        bool isCreate = col == 0;
+        bool isView = col != 0;
+        
+        // create or recreate or view
+        sat::WorkFlowFactory* factory = (sat::WorkFlowFactory*)workFlowItem->factory;
+        if (factory->latestPtr == nullptr)
         {
-            void* model = sat::DisplayManager::getInstance()->getDisplayModel();
-            if (model == nullptr)
-            {
-                printf("no model selected\n");
-                return;
-            }
-            
-            WorkFlowWidgetItem* workFlowItem = dynamic_cast<WorkFlowWidgetItem*>(item);
-            sat::WorkFlowFactory* factory = (sat::WorkFlowFactory*)workFlowItem->factory;
-            sat::WorkFlow* workFlow = factory->create();
-            
-            void* currentMesh = sat::DisplayManager::getInstance()->getDisplayModel();
-            if (currentMesh != nullptr)
-            {
-                MeshModel* mp = (MeshModel*)currentMesh;
-                sat::Model* model = SAUtil::convertMeshFromMeshlabToSAGeo(mp);
-                workFlow->getSharedContext().addRef(workFlow->getInputLabel(), model, sat::deleteShareData<sat::Model>);
-                sat::DisplayManager::getInstance()->addWorkFlow(item, workFlow);
-                sat::DisplayManager::getInstance()->activeWorkFlow(item);
-                
-                workFlow->executeFrame();
-            }
-        } else
-        {
-            sat::DisplayManager::getInstance()->activeWorkFlow(item);
+            std::shared_ptr<sat::WorkFlow> workFlow = factory->create();
+            sat::DisplayManager::getInstance()->addWorkFlow(item, workFlow);
+            factory->latestPtr = workFlow;
         }
+        
+        if (isCreate && factory->latestPtr->isOver())
+        {
+            std::shared_ptr<sat::WorkFlow> workFlow = factory->create();
+            sat::DisplayManager::getInstance()->addWorkFlow(item, workFlow);
+            factory->latestPtr = workFlow;
+        }
+        
+        if (isCreate && currentMesh != nullptr && !factory->latestPtr->getSharedContext().contains(factory->latestPtr->getInputLabel()))
+        {
+            MeshModel* mp = (MeshModel*)currentMesh;
+            sat::Model* model = SAUtil::convertMeshFromMeshlabToSAGeo(mp);
+            factory->latestPtr->getSharedContext().addRef(factory->latestPtr->getInputLabel(), model, sat::deleteShareData<sat::Model>);
+        }
+        
+        if (isCreate && currentMesh != nullptr && factory->latestPtr->getStatus() != sat::WorkFlow::Status::EXECUTING)
+        {
+            if (ui->frameExecuteCheckBox)
+            {
+                int frameCount = ui->frameExecuteText->text().toInt();
+                if (frameCount == 0) frameCount = INT_MAX;
+                factory->latestPtr->setPauseInFrame(frameCount);
+            } else
+            {
+                factory->latestPtr->setPauseInFrame(INT_MAX);
+            }
+            factory->latestPtr->executeFrameInSubThread();
+        }
+        sat::DisplayManager::getInstance()->activeWorkFlow(item);
     }
 }
 
@@ -150,6 +256,15 @@ WorkFlowWidgetItem::WorkFlowWidgetItem(void* factory)
     this->factory = factory;
 }
 WorkFlowWidgetItem::~WorkFlowWidgetItem()
+{
+    
+}
+
+JobWidgetItem::JobWidgetItem(void* job)
+{
+    this->job = job;
+}
+JobWidgetItem::~JobWidgetItem()
 {
     
 }
