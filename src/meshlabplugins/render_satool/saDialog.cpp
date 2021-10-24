@@ -41,8 +41,9 @@ SADialog::SADialog(QGLWidget* gla, QWidget *parent)
     connect(ui->workFlowTreeWidget, SIGNAL(itemCollapsed(QTreeWidgetItem * )) , this,  SLOT(adaptLayout(QTreeWidgetItem *)));
     connect(ui->frameExecuteCheckBox, SIGNAL(stateChanged(int)), this, SLOT(frameExecuteStateChange(int)));
     connect(ui->resetPauseFrame, SIGNAL(released()), this, SLOT(pauseFrame()));
+    connect(ui->selectWorkFlowJobTreeWidget, SIGNAL(itemPressed(QTreeWidgetItem * , int  )) , this, SLOT(jobDetailClicked(QTreeWidgetItem * , int ) ) );
     
-    mFrameTimeID = startTimer(125);
+    mFrameTimeID = startTimer(66);
 }
 
 SADialog::~SADialog()
@@ -55,6 +56,28 @@ SADialog::~SADialog()
         delete ui;
         ui = NULL;
     }
+}
+
+void SADialog::initSupportWorkFlow()
+{
+    WorkFlowWidgetItem* item = new WorkFlowWidgetItem(NULL);
+    item->setIcon(0, QIcon(":/images/convert-3217.png"));
+    ui->workFlowTreeWidget->addTopLevelItem(item);
+    
+    std::vector<sat::WorkFlowFactory*> workflowFactories = sat::meshlab::supportedWorkFlows();
+    for (int i = 0, in = workflowFactories.size(); i < in; i++)
+    {
+        sat::WorkFlowFactory* factory = workflowFactories[i];
+        
+        WorkFlowWidgetItem* item = new WorkFlowWidgetItem(factory);
+        item->setIcon(0, QIcon(":/images/start.png"));
+        item->setText(1, tr(factory->getWorkFlowName()));
+        item->setIcon(2, QIcon(":/images/view.png"));
+        ui->workFlowTreeWidget->addTopLevelItem(item);
+    }
+    
+    std::function<void(sat::WorkFlow*, sat::WorkFlow*)> fn = std::bind(&SADialog::workFlowChangedListener, this, std::placeholders::_1, std::placeholders::_2, true);
+    sat::DisplayManager::getInstance()->addWorkFlowChangedListener(this, fn);
 }
 
 void SADialog::timerEvent(QTimerEvent *)
@@ -104,6 +127,7 @@ void SADialog::workFlowChangedListener(sat::WorkFlow* from, sat::WorkFlow* to, b
     {
         sat::WorkFlow* workFlow = to;
         const sat::Job* eJob = workFlow->executingJob();
+        const sat::Job* vJob = workFlow->viewingJob();
         for (int i = 0, size = workFlow->getJobSize(); i < size; i++)
         {
             sat::Job* job = workFlow->getJobAt(i);
@@ -141,7 +165,14 @@ void SADialog::workFlowChangedListener(sat::WorkFlow* from, sat::WorkFlow* to, b
                 item->setBackground(1, QBrush(QColor("#666600")));
             }
             item->setText(1, tr(job->getName()));
-            item->setIcon(2, QIcon(":/images/view.png"));
+            
+            if (job == vJob)
+            {
+                item->setIcon(2, QIcon(":/images/sa_eye.png"));
+            } else
+            {
+                item->setIcon(2, QIcon(":/images/view.png"));
+            }
             ui->selectWorkFlowJobTreeWidget->addTopLevelItem(item);
         }
     }
@@ -150,28 +181,6 @@ void SADialog::workFlowChangedListener(sat::WorkFlow* from, sat::WorkFlow* to, b
     {
         glarea->repaint();
     }
-}
-
-void SADialog::initSupportWorkFlow()
-{
-    WorkFlowWidgetItem* item = new WorkFlowWidgetItem(NULL);
-    item->setIcon(0, QIcon(":/images/convert-3217.png"));
-    ui->workFlowTreeWidget->addTopLevelItem(item);
-    
-    std::vector<sat::WorkFlowFactory*> workflowFactories = sat::meshlab::supportedWorkFlows();
-    for (int i = 0, in = workflowFactories.size(); i < in; i++)
-    {
-        sat::WorkFlowFactory* factory = workflowFactories[i];
-        
-        WorkFlowWidgetItem* item = new WorkFlowWidgetItem(factory);
-        item->setIcon(0, QIcon(":/images/start.png"));
-        item->setText(1, tr(factory->getWorkFlowName()));
-        item->setIcon(2, QIcon(":/images/view.png"));
-        ui->workFlowTreeWidget->addTopLevelItem(item);
-    }
-    
-    std::function<void(sat::WorkFlow*, sat::WorkFlow*)> fn = std::bind(&SADialog::workFlowChangedListener, this, std::placeholders::_1, std::placeholders::_2, true);
-    sat::DisplayManager::getInstance()->addWorkFlowChangedListener(this, fn);
 }
 
 void SADialog::workFlowClicked (QTreeWidgetItem * item , int col)
@@ -195,6 +204,7 @@ void SADialog::workFlowClicked (QTreeWidgetItem * item , int col)
         if (factory->latestPtr == nullptr)
         {
             std::shared_ptr<sat::WorkFlow> workFlow = factory->create();
+            workFlow->setDebugLevel(1);
             sat::DisplayManager::getInstance()->addWorkFlow(item, workFlow);
             factory->latestPtr = workFlow;
         }
@@ -202,6 +212,7 @@ void SADialog::workFlowClicked (QTreeWidgetItem * item , int col)
         if (isCreate && factory->latestPtr->isOver())
         {
             std::shared_ptr<sat::WorkFlow> workFlow = factory->create();
+            workFlow->setDebugLevel(1);
             sat::DisplayManager::getInstance()->addWorkFlow(item, workFlow);
             factory->latestPtr = workFlow;
         }
@@ -209,7 +220,7 @@ void SADialog::workFlowClicked (QTreeWidgetItem * item , int col)
         if (isCreate && currentMesh != nullptr && !factory->latestPtr->getSharedContext().contains(factory->latestPtr->getInputLabel()))
         {
             MeshModel* mp = (MeshModel*)currentMesh;
-            sat::Model* model = SAUtil::convertMeshFromMeshlabToSAGeo(mp);
+            sat::Model* model = SADataUtil::convertMeshFromMeshlabToSAGeo(mp);
             factory->latestPtr->getSharedContext().addRef(factory->latestPtr->getInputLabel(), model, sat::deleteShareData<sat::Model>);
         }
         
@@ -227,6 +238,26 @@ void SADialog::workFlowClicked (QTreeWidgetItem * item , int col)
             factory->latestPtr->executeFrameInSubThread();
         }
         sat::DisplayManager::getInstance()->activeWorkFlow(item);
+    }
+}
+
+void SADialog::jobDetailClicked(QTreeWidgetItem * item, int col)
+{
+    if(item)
+    {
+        JobWidgetItem* jobDetailItem = dynamic_cast<JobWidgetItem*>(item);
+        if (jobDetailItem->job == nullptr) return;
+        std::shared_ptr<sat::WorkFlow> workFlow = sat::DisplayManager::getInstance()->getDisplayingWorkFlow();
+        if (workFlow == nullptr) return;
+        if (jobDetailItem->job == workFlow->executingJob())
+        {
+            workFlow->setViewingJobIndex(-1);
+        } else
+        {
+            int jobIndex = workFlow->getJobIndex((sat::Job*)jobDetailItem->job);
+            if (jobIndex < 0) return;
+            workFlow->setViewingJobIndex(jobIndex);
+        }
     }
 }
 

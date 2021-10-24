@@ -12,12 +12,18 @@
 
 #include "Model/Geometory.h"
 //#include "display/DisplayManager.h"
-//class GLArea;
+class GLArea;
 
-class SAUtil
+class SADataUtil
 {
 public:
     static sat::Model* convertMeshFromMeshlabToSAGeo(MeshModel* meshModel);
+};
+
+class SARenderUtil
+{
+public:
+    static void render(GLArea *gla, sat::Model* model, const std::vector<GLuint>& texIds);
 };
 
 #endif

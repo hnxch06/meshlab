@@ -1,7 +1,7 @@
 #include "sadelegate.h"
-//#include "../../meshlab/glarea.h"
+#include "../../meshlab/glarea.h"
 
-sat::Model* SAUtil::convertMeshFromMeshlabToSAGeo(MeshModel* meshModel)
+sat::Model* SADataUtil::convertMeshFromMeshlabToSAGeo(MeshModel* meshModel)
 {
     sat::Model* model = new sat::Model();
     
@@ -47,4 +47,26 @@ sat::Model* SAUtil::convertMeshFromMeshlabToSAGeo(MeshModel* meshModel)
     model->lockMesh();
     
     return model;
+}
+
+
+
+/*  /////////////////////////////////////
+ *  Custom Render Functions.......
+ *  /////////////////////////////////////
+ */
+
+void SARenderUtil::render(GLArea *gla, sat::Model* model, const std::vector<GLuint>& texIds)
+{
+    MLSceneGLSharedDataContext* shared = gla->mvc()->sharedDataContext();
+    
+    glPushAttrib(GL_ALL_ATTRIB_BITS);
+    glMatrixMode(GL_MODELVIEW);
+    glPushMatrix();
+//    glMultMatrix(_tr);
+    
+    glPopMatrix();
+    glPopAttrib();
+    glFlush();
+    glFinish();
 }

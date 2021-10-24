@@ -50,6 +50,9 @@
                                         <pointsize>9</pointsize>
                                     </font>
                                 </property>
+                                <property name="text">
+                                    <string>1</string>
+                                </property>
                                 <property name="readOnly">
                                     <bool>false</bool>
                                 </property>

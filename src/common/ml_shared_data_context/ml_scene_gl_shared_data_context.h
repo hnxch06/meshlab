@@ -26,6 +26,9 @@
 
 #include "ml_shared_data_context.h"
 
+// SATOOL
+#include <functional>
+
 class MLSceneGLSharedDataContext : public QGLWidget
 {
 	Q_OBJECT
@@ -59,6 +62,9 @@ public:
 
 	void draw(int mmid, QGLContext* viewid) const;
 	void drawAllocatedAttributesSubset(int mmid, QGLContext* viewid, const MLRenderingData& dt);
+    // SATOOL
+    void drawCustom(int mmid, QGLContext * viewid, std::function<void(const std::vector<GLuint>&)> fn);
+    
 	void setSceneTransformationMatrix(const Matrix44m& m);
 	void setMeshTransformationMatrix(int mmid, const Matrix44m& m);
 

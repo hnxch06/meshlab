@@ -276,6 +276,14 @@ void MLSceneGLSharedDataContext::drawAllocatedAttributesSubset(int mmid, QGLCont
 		man->drawAllocatedAttributesSubset(viewid,dt);
 }
 
+// SATOOL
+void MLSceneGLSharedDataContext::drawCustom(int mmid, QGLContext * viewid, std::function<void(const std::vector<GLuint>&)> fn)
+{
+    PerMeshMultiViewManager* man = meshAttributesMultiViewerManager(mmid);
+    if (man != NULL)
+        man->drawCustom(viewid,fn);
+}
+
 void MLSceneGLSharedDataContext::removeView( QGLContext* viewerid )
 {
 	QGLContext* ctx = makeCurrentGLContext();

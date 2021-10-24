@@ -16,7 +16,9 @@
 #include <QCoreApplication>
 #include "../../meshlab/mainwindow.h"
 #include "../../meshlab/glarea.h"
+#include "sadelegate.h"
 
+#include "display/Display.h"
 #include "display/DisplayManager.h"
 
 using namespace vcg;
@@ -61,8 +63,12 @@ void SAToolRenderPlugin::setFrameDocument(MeshDocument &md, MLSceneGLSharedDataC
 
 bool SAToolRenderPlugin::hasCustomRenderContent()
 {
+    if (sat::DisplayManager::getInstance()->getDisplayModel() == nullptr) return false;
     std::shared_ptr<sat::WorkFlow> workFlow = sat::DisplayManager::getInstance()->getDisplayingWorkFlow();
     if (workFlow == nullptr) return false;
+    const sat::Job* job = workFlow->viewingJob();
+    const sat::DisplayFrame* frame = job != nullptr ? job->getDisplayFrame() : nullptr;
+    if (frame == nullptr || !frame->hasData()) return false;
     return true;
 }
 
@@ -95,9 +101,25 @@ void SAToolRenderPlugin::init(QAction *a, MeshDocument &md, MLSceneGLSharedDataC
         saDialog->show();
     }
 }
-void SAToolRenderPlugin::render(QAction *a, MeshDocument &md, MLSceneGLSharedDataContext::PerMeshRenderingDataMap&mp, GLArea *gla)
+
+void SAToolRenderPlugin::render(QAction *a, MeshDocument &md, MLSceneGLSharedDataContext::PerMeshRenderingDataMap& mrdp, GLArea *gla)
 {
+    std::shared_ptr<sat::WorkFlow> workFlow = sat::DisplayManager::getInstance()->getDisplayingWorkFlow();
+    if (workFlow == nullptr) return;
+    const sat::Job* job = workFlow->viewingJob();
+    const sat::DisplayFrame* frame = job != nullptr ? job->getDisplayFrame() : nullptr;
+    if (frame == nullptr || !frame->hasData()) return;
+    
+    void* displayModel_voidptr = sat::DisplayManager::getInstance()->getDisplayModel();
+    MeshModel* mp = (MeshModel*)displayModel_voidptr;
+    if (mp == nullptr || !gla->meshVisibilityMap[mp->id()]) return;
+    
+    MLSceneGLSharedDataContext* shared = gla->mvc()->sharedDataContext();
+    
+    std::function<void(const std::vector<GLuint>&)> fn = std::bind(&SARenderUtil::render, gla, frame->model, std::placeholders::_1);
+    shared->drawCustom(mp->id(), gla->context(), fn);
 }
+
 void SAToolRenderPlugin::finalize(QAction * a, MeshDocument *md, GLArea *gla)
 {
     if (saDialog != nullptr)

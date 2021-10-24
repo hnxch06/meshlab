@@ -88,6 +88,7 @@ private slots:
     void adaptLayout(QTreeWidgetItem * item);
     void frameExecuteStateChange(int state);
     void pauseFrame();
+    void jobDetailClicked(QTreeWidgetItem * , int );
     
 };
 
