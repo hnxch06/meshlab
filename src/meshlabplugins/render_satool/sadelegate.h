@@ -11,7 +11,8 @@
 #include <QSignalMapper>
 
 #include "Model/Geometory.h"
-//#include "display/DisplayManager.h"
+#include "display/Display.h"
+
 class GLArea;
 
 class SADataUtil
@@ -23,7 +24,7 @@ public:
 class SARenderUtil
 {
 public:
-    static void render(GLArea *gla, sat::Model* model, const std::vector<GLuint>& texIds);
+    static void render(GLArea *gla, sat::DisplayFrame* frame, const std::vector<GLuint>& texIds);
 };
 
 #endif
