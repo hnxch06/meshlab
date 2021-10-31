@@ -118,6 +118,7 @@ void SAToolRenderPlugin::render(QAction *a, MeshDocument &md, MLSceneGLSharedDat
     
     sat::DisplayFrame* mutable_frame= const_cast<sat::DisplayFrame*>(frame);
     std::function<void(const std::vector<GLuint>&)> fn = std::bind(&SARenderUtil::render, gla, mutable_frame, std::placeholders::_1);
+    
     shared->drawCustom(mp->id(), gla->context(), fn);
 }
 

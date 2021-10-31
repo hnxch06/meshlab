@@ -57,75 +57,21 @@ sat::Model* SADataUtil::convertMeshFromMeshlabToSAGeo(MeshModel* meshModel)
  *  Custom Render Functions.......
  *  /////////////////////////////////////
  */
-
-typedef struct SAFrameRenderState
-{
-    sat::DisplayFrame* frame = nullptr;
-    bool inited = false;
-    
-    GLuint vbo_count = 0;
-    GLuint vbos[128];
-} SAFrameRenderState;
-
-void SAFrameRenderStateInit(SAFrameRenderState* renderState)
-{
-    renderState->vbo_count = std::min(renderState->frame->model->getMeshCount(), 128);
-    glGenBuffers(renderState->vbo_count, renderState->vbos);
-    
-    for (int i = 0; i < renderState->vbo_count; i++)
-    {
-        glBindBuffer(GL_ARRAY_BUFFER, renderState->vbos[i]);
-        
-        sat::Mesh* mesh = renderState->frame->model->getMesh(i);
-        int bufferSize = mesh->verts.size() * sizeof(sat::Vertex);
-        glBufferData(GL_ARRAY_BUFFER, bufferSize, &(mesh->verts[0]), GL_STATIC_DRAW);
-    }
-}
-
-void SAFrameRenderStateRelease(void* userData)
-{
-    SAFrameRenderState* renderState = (SAFrameRenderState*)userData;
-    
-    if (renderState->vbo_count > 0)
-    {
-        glDeleteBuffers(renderState->vbo_count, renderState->vbos);
-        renderState->vbo_count = 0;
-    }
-}
-
 void SARenderUtil::render(GLArea *gla, sat::DisplayFrame* frame, const std::vector<GLuint>& texIds)
 {
     MLSceneGLSharedDataContext* shared = gla->mvc()->sharedDataContext();
+
+    sat::GLFrameStaticRenderState* renderState = sat::GLRender::getInstance()->prepareStaticRenderState(frame);
     
-    if (frame->userData == nullptr)
-    {
-        SAFrameRenderState* state = new SAFrameRenderState();
-        state->frame = frame;
-        frame->userData = state;
-        frame->userDataReleaseFn = SAFrameRenderStateRelease;
-    }
-    
-    SAFrameRenderState* renderState = (SAFrameRenderState*)frame->userData;
-    if (!renderState->inited)
-    {
-        renderState->inited = true;
-        SAFrameRenderStateInit(renderState);
-    }
-    
-    sat::GLProgram* program = sat::GLDefaultProgram::getInstance()->getProgram(sat::GLProgramReservedName::SIMPLE_POSITION_COLOR);
-    
-    if (program != NULL)
-    {
-        program->useProgram();
-    }
-    
-    glPushAttrib(GL_ALL_ATTRIB_BITS);
+//    glPushAttrib(GL_ALL_ATTRIB_BITS);
     glMatrixMode(GL_MODELVIEW);
     glPushMatrix();
 //    glMultMatrix(_tr);
     
+    renderState->staticDraw();
+    
     glPopMatrix();
-    glPopAttrib();
+//    glPopAttrib();
     glFlush();
     glFinish();
 }
