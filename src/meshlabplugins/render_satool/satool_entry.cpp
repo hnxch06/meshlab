@@ -68,8 +68,32 @@ bool SAToolRenderPlugin::hasCustomRenderContent()
     if (workFlow == nullptr) return false;
     const sat::Job* job = workFlow->viewingJob();
     const sat::DisplayFrame* frame = job != nullptr ? job->getDisplayFrame() : nullptr;
+    
+    // if there is no delegate or delegate has no data
     if (frame == nullptr || !frame->hasData()) return false;
+    // if delegate just upload new model, but use the oringle render
+    if (frame->type == sat::DisplayFrame::DisplayType::RENDER_DELEGATE) return false;
     return true;
+}
+
+unsigned int SAToolRenderPlugin::hasSpecifyRenderModel(MeshDocument& md)
+{
+    if (sat::DisplayManager::getInstance()->getDisplayModel() == nullptr) return false;
+    std::shared_ptr<sat::WorkFlow> workFlow = sat::DisplayManager::getInstance()->getDisplayingWorkFlow();
+    if (workFlow == nullptr) return false;
+    const sat::Job* job = workFlow->viewingJob();
+    const sat::DisplayFrame* frame = job != nullptr ? job->getDisplayFrame() : nullptr;
+    
+    if (frame != nullptr && frame->type == sat::DisplayFrame::DisplayType::RENDER_DELEGATE)
+    {
+        if (frame->userData == nullptr)
+        {
+            const_cast<sat::DisplayFrame*>(frame)->userData = (void*)(SADataUtil::addMeshToDoc(&md, frame->model));
+        }
+        MeshModel* meshModel = (MeshModel*)frame->userData;
+        return meshModel->id();
+    }
+    return 0;
 }
 
 void SAToolRenderPlugin::init(QAction *a, MeshDocument &md, MLSceneGLSharedDataContext::PerMeshRenderingDataMap&mp, GLArea *gla) {
@@ -108,7 +132,7 @@ void SAToolRenderPlugin::render(QAction *a, MeshDocument &md, MLSceneGLSharedDat
     if (workFlow == nullptr) return;
     const sat::Job* job = workFlow->viewingJob();
     const sat::DisplayFrame* frame = job != nullptr ? job->getDisplayFrame() : nullptr;
-    if (frame == nullptr || !frame->hasData()) return;
+    if (frame == nullptr || !frame->hasData() || frame->type == sat::DisplayFrame::DisplayType::RENDER_DELEGATE) return;
     
     void* displayModel_voidptr = sat::DisplayManager::getInstance()->getDisplayModel();
     MeshModel* mp = (MeshModel*)displayModel_voidptr;

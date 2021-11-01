@@ -516,7 +516,17 @@ void GLArea::paintEvent(QPaintEvent* /*event*/)
         }
         else
         {
-            if(hasToSelectMesh) // right mouse click you have to select a mesh
+            // for satool plugin begin
+            unsigned int iRenderSpecifyModel = iRenderer->hasSpecifyRenderModel(*this->md());
+            if (iRenderer && iRenderSpecifyModel != 0)
+            {
+                md()->setCurrentMesh(iRenderSpecifyModel);
+                if (mw() != NULL)
+                    mw()->updateLayerDialog();
+            }
+            // for satool plugin end
+            
+            else if(hasToSelectMesh) // right mouse click you have to select a mesh
             {
                 int newId=RenderForSelection(pointToPick[0],pointToPick[1]);
                 if(newId>=0)

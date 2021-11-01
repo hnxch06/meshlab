@@ -1,6 +1,8 @@
 #include "sadelegate.h"
 #include "workflow/WorkFlowSharedData.h"
 #include "../../meshlab/glarea.h"
+#include "../../common/ml_document/mesh_document.h"
+#include "../../vcglib/vcg/complex/allocate.h"
 #include "display/render/GLRender.h"
 
 sat::Model* SADataUtil::convertMeshFromMeshlabToSAGeo(MeshModel* meshModel)
@@ -49,6 +51,79 @@ sat::Model* SADataUtil::convertMeshFromMeshlabToSAGeo(MeshModel* meshModel)
     model->lockMesh();
     
     return model;
+}
+
+MeshModel* SADataUtil::addMeshToDoc(void* meshDocumentPtr, sat::Model* model)
+{
+    MeshDocument* meshDocument = (MeshDocument*)meshDocumentPtr;
+    MeshDocument& md = *meshDocument;
+    
+    CMeshO omesh;
+    omesh.Clear();
+    
+    const sat::Mesh& fm = model->getFlattenMesh();
+    int vertexCount = fm.verts.size();
+    omesh.vert.reserve(vertexCount);
+    int triangleCount = 0;
+    for (int i = 0, isize = fm.faces.size(); i < isize; i++)
+    {
+        triangleCount += (fm.faces[i].count - 2);
+    }
+    omesh.face.reserve(triangleCount);
+    
+    vcg::tri::Allocator<CMeshO>::AddVertices(omesh, vertexCount);
+    for (int i = 0; i < vertexCount; i++)
+    {
+        CVertexO& wv = omesh.vert[i];
+        const sat::Vertex& rv = fm.verts[i];
+        wv.P() = CMeshO::CoordType(rv.pos(0), rv.pos(1), rv.pos(2));
+        // aka vcg::Point3<float>;
+
+        if (fm.withColor)
+        {
+            wv.C() = vcg::Point4<unsigned char>(rv.color(0), rv.color(1), rv.color(2), rv.color(3));
+        }
+    }
+    
+    for (int i = 0, isize = fm.faces.size(); i < isize; i++)
+    {
+        const sat::Face& rf = fm.faces[i];
+        for (int j = 2; j < rf.count; j++)
+        {
+            CVertexO* v0 = &(omesh.vert[rf.idx[0]]);
+            CVertexO* v1 = &(omesh.vert[rf.idx[j - 1]]);
+            CVertexO* v2 = &(omesh.vert[rf.idx[j]]);
+            vcg::tri::Allocator<CMeshO>::AddFace(omesh, v0, v1, v2);
+        }
+    }
+    
+    
+//    for (int i = 0; i < vertexCount; i++)
+//    {
+//        CVertexO wv;
+//        const sat::Vertex& rv = fm.verts[i];
+//        wv.P() = CMeshO::CoordType(rv.pos(0), rv.pos(1), rv.pos(2));
+//
+//        if (fm.withColor)
+//        {
+//            wv.C() = vcg::Point4<unsigned char>(rv.color(0), rv.color(1), rv.color(2), rv.color(3));
+//        }
+//        omesh.vert.push_back(wv);
+//    }
+    
+//    for (int i = 0, isize = fm.faces.size(); i < isize; i++)
+//    {
+//        const sat::Face& rf = fm.faces[i];
+//        for (int j = 2; j < rf.count; j++)
+//        {
+//            CFaceO wf;
+////            wf.V(0) = rf.idx[0];
+////            wf.V(1) = rf.idx[j - 1];
+////            wf.V(2) = rf.idx[j];
+//            omesh.face.push_back(wf);
+//        }
+//    }
+    return md.addNewMesh(omesh, "sa_gen_mesh", false);
 }
 
 

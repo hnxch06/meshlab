@@ -27,6 +27,7 @@ public:
     
     void setFrameDocument( MeshDocument &, MLSceneGLSharedDataContext::PerMeshRenderingDataMap& mp, GLArea *);
     bool hasCustomRenderContent();
+    unsigned int hasSpecifyRenderModel(MeshDocument& md);
     
 private:
     SADialog* saDialog;
