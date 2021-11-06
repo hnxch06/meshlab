@@ -19,7 +19,9 @@ class SADataUtil
 {
 public:
     static sat::Model* convertMeshFromMeshlabToSAGeo(MeshModel* meshModel);
-    static MeshModel* addMeshToDoc(void* meshDocument, sat::Model* model);
+    static MeshModel* addMeshToDoc(void* meshDocument, void* glArea, sat::Model* model, const char* name);
+    static MeshModel* addMeshToDoc(void* meshDocument, void* glArea, const sat::Mesh* mesh, const char* name);
+    static void removeMeshFromDoc(void* meshDocument, MeshModel* mm);
 };
 
 class SARenderUtil

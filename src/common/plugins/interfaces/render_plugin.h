@@ -76,7 +76,7 @@ public:
     virtual void setMainWindow(void* mainWindow) {}
     virtual void setFrameDocument( MeshDocument &, MLSceneGLSharedDataContext::PerMeshRenderingDataMap& mp, GLArea *) {};
     virtual bool hasCustomRenderContent() { return true; }
-    virtual unsigned int hasSpecifyRenderModel(MeshDocument &) { return 0; }
+    virtual unsigned int hasSpecifyRenderModel(MeshDocument &, GLArea*) { return 0; }
 };
 
 #define RENDER_PLUGIN_IID  "vcg.meshlab.RenderPlugin/1.0"

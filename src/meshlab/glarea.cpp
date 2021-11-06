@@ -517,12 +517,15 @@ void GLArea::paintEvent(QPaintEvent* /*event*/)
         else
         {
             // for satool plugin begin
-            unsigned int iRenderSpecifyModel = iRenderer->hasSpecifyRenderModel(*this->md());
+            unsigned int iRenderSpecifyModel = iRenderer != NULL ? iRenderer->hasSpecifyRenderModel(*this->md(), this) : 0;
             if (iRenderer && iRenderSpecifyModel != 0)
             {
-                md()->setCurrentMesh(iRenderSpecifyModel);
-                if (mw() != NULL)
-                    mw()->updateLayerDialog();
+                if (md()->mm() != md()->getMesh(iRenderSpecifyModel))
+                {
+                    md()->setCurrentMesh(iRenderSpecifyModel);
+                    if (mw() != NULL)
+                        mw()->updateLayerDialog();
+                }
             }
             // for satool plugin end
             
@@ -545,7 +548,7 @@ void GLArea::paintEvent(QPaintEvent* /*event*/)
 
             for(const MeshModel& mp : md()->meshIterator())
             {
-                if (meshVisibilityMap[mp.id()])
+                if (meshVisibilityMap[mp.id()] && (iRenderSpecifyModel == 0 || iRenderSpecifyModel == mp.id()))
                 {
                     MLRenderingData curr;
                     datacont->getRenderInfoPerMeshView(mp.id(),context(),curr);
@@ -566,7 +569,7 @@ void GLArea::paintEvent(QPaintEvent* /*event*/)
             }
             for(MeshModel& mp : md()->meshIterator())
             {
-                if (meshVisibilityMap[mp.id()])
+                if (meshVisibilityMap[mp.id()] && (iRenderSpecifyModel == 0 || iRenderSpecifyModel == mp.id()))
                 {
                     MLRenderingData curr;
                     MLDefaultMeshDecorators defdec(mw());

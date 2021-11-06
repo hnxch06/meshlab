@@ -18,6 +18,7 @@
 #include "../../meshlab/glarea.h"
 #include "sadelegate.h"
 
+#include <functional>
 #include "display/Display.h"
 #include "display/DisplayManager.h"
 
@@ -72,11 +73,11 @@ bool SAToolRenderPlugin::hasCustomRenderContent()
     // if there is no delegate or delegate has no data
     if (frame == nullptr || !frame->hasData()) return false;
     // if delegate just upload new model, but use the oringle render
-    if (frame->type == sat::DisplayFrame::DisplayType::RENDER_DELEGATE) return false;
+    if (frame->renderType == sat::DisplayFrame::RenderType::RENDER_DELEGATE) return false;
     return true;
 }
 
-unsigned int SAToolRenderPlugin::hasSpecifyRenderModel(MeshDocument& md)
+unsigned int SAToolRenderPlugin::hasSpecifyRenderModel(MeshDocument& md, GLArea* glArea)
 {
     if (sat::DisplayManager::getInstance()->getDisplayModel() == nullptr) return false;
     std::shared_ptr<sat::WorkFlow> workFlow = sat::DisplayManager::getInstance()->getDisplayingWorkFlow();
@@ -84,11 +85,16 @@ unsigned int SAToolRenderPlugin::hasSpecifyRenderModel(MeshDocument& md)
     const sat::Job* job = workFlow->viewingJob();
     const sat::DisplayFrame* frame = job != nullptr ? job->getDisplayFrame() : nullptr;
     
-    if (frame != nullptr && frame->type == sat::DisplayFrame::DisplayType::RENDER_DELEGATE)
+    if (frame != nullptr && frame->renderType == sat::DisplayFrame::RenderType::RENDER_DELEGATE)
     {
         if (frame->userData == nullptr)
         {
-            const_cast<sat::DisplayFrame*>(frame)->userData = (void*)(SADataUtil::addMeshToDoc(&md, frame->model));
+            const_cast<sat::DisplayFrame*>(frame)->userData = (void*)(SADataUtil::addMeshToDoc(&md, glArea, frame->model, frame->frameName.length() > 0 ? frame->frameName.c_str() : "sat_autogen_unnamed"));
+            
+            std::function<void(void*)> fn = [mdPtr = &md](void* userData){
+                SADataUtil::removeMeshFromDoc(mdPtr, (MeshModel*)userData);
+            };
+            const_cast<sat::DisplayFrame*>(frame)->userDataReleaseFn = fn;
         }
         MeshModel* meshModel = (MeshModel*)frame->userData;
         return meshModel->id();
@@ -132,7 +138,7 @@ void SAToolRenderPlugin::render(QAction *a, MeshDocument &md, MLSceneGLSharedDat
     if (workFlow == nullptr) return;
     const sat::Job* job = workFlow->viewingJob();
     const sat::DisplayFrame* frame = job != nullptr ? job->getDisplayFrame() : nullptr;
-    if (frame == nullptr || !frame->hasData() || frame->type == sat::DisplayFrame::DisplayType::RENDER_DELEGATE) return;
+    if (frame == nullptr || !frame->hasData() || frame->renderType == sat::DisplayFrame::RenderType::RENDER_DELEGATE) return;
     
     void* displayModel_voidptr = sat::DisplayManager::getInstance()->getDisplayModel();
     MeshModel* mp = (MeshModel*)displayModel_voidptr;

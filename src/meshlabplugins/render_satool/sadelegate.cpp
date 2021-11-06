@@ -53,21 +53,35 @@ sat::Model* SADataUtil::convertMeshFromMeshlabToSAGeo(MeshModel* meshModel)
     return model;
 }
 
-MeshModel* SADataUtil::addMeshToDoc(void* meshDocumentPtr, sat::Model* model)
+MeshModel* SADataUtil::addMeshToDoc(void* meshDocumentPtr, void* glArea, sat::Model* model, const char* name)
 {
+    const sat::Mesh& fm = model->getFlattenMesh();
+    return SADataUtil::addMeshToDoc(meshDocumentPtr, glArea, &fm, name);
+}
+
+MeshModel* SADataUtil::addMeshToDoc(void* meshDocumentPtr, void* glAreaV, const sat::Mesh* mesh, const char* name)
+{
+    GLArea* glArea = (GLArea*)glAreaV;
     MeshDocument* meshDocument = (MeshDocument*)meshDocumentPtr;
     MeshDocument& md = *meshDocument;
     
     CMeshO omesh;
     omesh.Clear();
     
-    const sat::Mesh& fm = model->getFlattenMesh();
-    int vertexCount = fm.verts.size();
+    int mask = 0;
+    mask |= vcg::tri::io::Mask::IOM_VERTQUALITY;
+    mask |= vcg::tri::io::Mask::IOM_FACEQUALITY;
+    if (mesh->withColor)
+    {
+        mask |= vcg::tri::io::Mask::IOM_VERTCOLOR;
+    }
+    
+    int vertexCount = mesh->verts.size();
     omesh.vert.reserve(vertexCount);
     int triangleCount = 0;
-    for (int i = 0, isize = fm.faces.size(); i < isize; i++)
+    for (int i = 0, isize = mesh->faces.size(); i < isize; i++)
     {
-        triangleCount += (fm.faces[i].count - 2);
+        triangleCount += (mesh->faces[i].count - 2);
     }
     omesh.face.reserve(triangleCount);
     
@@ -75,19 +89,19 @@ MeshModel* SADataUtil::addMeshToDoc(void* meshDocumentPtr, sat::Model* model)
     for (int i = 0; i < vertexCount; i++)
     {
         CVertexO& wv = omesh.vert[i];
-        const sat::Vertex& rv = fm.verts[i];
+        const sat::Vertex& rv = mesh->verts[i];
         wv.P() = CMeshO::CoordType(rv.pos(0), rv.pos(1), rv.pos(2));
         // aka vcg::Point3<float>;
 
-        if (fm.withColor)
+        if (mesh->withColor)
         {
-            wv.C() = vcg::Point4<unsigned char>(rv.color(0), rv.color(1), rv.color(2), rv.color(3));
+            wv.C() = vcg::Point4<unsigned char>(rv.color(0) * 255, rv.color(1) * 255, rv.color(2) * 255, rv.color(3) * 255);
         }
     }
     
-    for (int i = 0, isize = fm.faces.size(); i < isize; i++)
+    for (int i = 0, isize = mesh->faces.size(); i < isize; i++)
     {
-        const sat::Face& rf = fm.faces[i];
+        const sat::Face& rf = mesh->faces[i];
         for (int j = 2; j < rf.count; j++)
         {
             CVertexO* v0 = &(omesh.vert[rf.idx[0]]);
@@ -97,33 +111,24 @@ MeshModel* SADataUtil::addMeshToDoc(void* meshDocumentPtr, sat::Model* model)
         }
     }
     
+    MeshModel* newMM = md.addNewMesh(omesh, name, false);
+    newMM->enable(mask);
     
-//    for (int i = 0; i < vertexCount; i++)
-//    {
-//        CVertexO wv;
-//        const sat::Vertex& rv = fm.verts[i];
-//        wv.P() = CMeshO::CoordType(rv.pos(0), rv.pos(1), rv.pos(2));
-//
-//        if (fm.withColor)
-//        {
-//            wv.C() = vcg::Point4<unsigned char>(rv.color(0), rv.color(1), rv.color(2), rv.color(3));
-//        }
-//        omesh.vert.push_back(wv);
-//    }
-    
-//    for (int i = 0, isize = fm.faces.size(); i < isize; i++)
-//    {
-//        const sat::Face& rf = fm.faces[i];
-//        for (int j = 2; j < rf.count; j++)
-//        {
-//            CFaceO wf;
-////            wf.V(0) = rf.idx[0];
-////            wf.V(1) = rf.idx[j - 1];
-////            wf.V(2) = rf.idx[j];
-//            omesh.face.push_back(wf);
-//        }
-//    }
-    return md.addNewMesh(omesh, "sa_gen_mesh", false);
+    if (md.mm() != NULL)
+    {
+        MLSceneGLSharedDataContext* datacont = glArea->mvc()->sharedDataContext();
+        MLRenderingData copyFromDt;
+        datacont->getRenderInfoPerMeshView(md.mm()->id(), glArea->context(), copyFromDt);
+        datacont->setRenderingDataPerMeshView(newMM->id(), glArea->context(), copyFromDt);
+    }
+    return newMM;
+}
+
+void SADataUtil::removeMeshFromDoc(void* meshDocumentPtr, MeshModel* mm)
+{
+    MeshDocument* meshDocument = (MeshDocument*)meshDocumentPtr;
+    MeshDocument& md = *meshDocument;
+    md.delMesh(mm->id());
 }
 
 
