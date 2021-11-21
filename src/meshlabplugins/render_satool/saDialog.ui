@@ -51,7 +51,7 @@
                                     </font>
                                 </property>
                                 <property name="text">
-                                    <string>1</string>
+                                    <string></string>
                                 </property>
                                 <property name="readOnly">
                                     <bool>false</bool>

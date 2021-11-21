@@ -43,7 +43,7 @@ SADialog::SADialog(QGLWidget* gla, QWidget *parent)
     connect(ui->resetPauseFrame, SIGNAL(released()), this, SLOT(pauseFrame()));
     connect(ui->selectWorkFlowJobTreeWidget, SIGNAL(itemPressed(QTreeWidgetItem * , int  )) , this, SLOT(jobDetailClicked(QTreeWidgetItem * , int ) ) );
     
-    mFrameTimeID = startTimer(66);
+    mFrameTimeID = startTimer(16);
 }
 
 SADialog::~SADialog()
@@ -91,6 +91,11 @@ void SADialog::timerEvent(QTimerEvent *)
             glarea->repaint();
         }
     }
+    
+//    if (glarea != NULL)
+//    {
+//        glarea->repaint();
+//    }
 }
 
 void SADialog::frameExecuteStateChange(int state)
@@ -147,12 +152,15 @@ void SADialog::workFlowChangedListener(sat::WorkFlow* from, sat::WorkFlow* to, b
             } else if (job->getStatus() == sat::Job::Status::FINISHED_SKIP)
             {
                 item->setIcon(0, QIcon(":/images/execute_error1.png"));
+            }  else if (job->getStatus() == sat::Job::Status::ERROR)
+            {
+                item->setIcon(0, QIcon(":/images/execute_error.png"));
+            } else if (job->isFrameBreak())
+            {
+                item->setIcon(0, QIcon(":/images/break_point.png"));
             } else if (job->getStatus() == sat::Job::Status::INIT)
             {
                 item->setIcon(0, QIcon(":/images/execute_hold.png"));
-            } else if (job->getStatus() == sat::Job::Status::ERROR)
-            {
-                item->setIcon(0, QIcon(":/images/execute_error.png"));
             }
             
             if (job == eJob && workFlow->getStatus() == sat::WorkFlow::Status::CANCELLED)
@@ -249,14 +257,27 @@ void SADialog::jobDetailClicked(QTreeWidgetItem * item, int col)
         if (jobDetailItem->job == nullptr) return;
         std::shared_ptr<sat::WorkFlow> workFlow = sat::DisplayManager::getInstance()->getDisplayingWorkFlow();
         if (workFlow == nullptr) return;
-        if (jobDetailItem->job == workFlow->executingJob())
+        
+        bool isSetBreakFrame = col == 0;
+        
+        if (!isSetBreakFrame)
         {
-            workFlow->setViewingJobIndex(-1);
+            if (jobDetailItem->job == workFlow->executingJob())
+            {
+                workFlow->setViewingJobIndex(-1);
+            } else
+            {
+                int jobIndex = workFlow->getJobIndex((sat::Job*)jobDetailItem->job);
+                if (jobIndex < 0) return;
+                workFlow->setViewingJobIndex(jobIndex);
+            }
         } else
         {
-            int jobIndex = workFlow->getJobIndex((sat::Job*)jobDetailItem->job);
-            if (jobIndex < 0) return;
-            workFlow->setViewingJobIndex(jobIndex);
+            sat::Job* job = (sat::Job*)(jobDetailItem->job);
+            int jobIndex = workFlow->getJobIndex(job);
+            job->toggleBreakFrame();
+            workFlow->getFactory()->toggleBreakFrame(jobIndex, 0);
+            workFlow->setStatusChanged();
         }
     }
 }

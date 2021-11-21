@@ -15,5 +15,6 @@
         <file>images/execute_error1.png</file>
         <file>images/execute_cancel.png</file>
         <file>images/execute_pause.png</file>
+        <file>images/break_point.png</file>
     </qresource>
 </RCC>
