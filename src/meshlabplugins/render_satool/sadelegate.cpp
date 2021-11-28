@@ -24,11 +24,24 @@ sat::Model* SADataUtil::convertMeshFromMeshlabToSAGeo(MeshModel* meshModel)
         satV.pos(1) = v.P().Y();
         satV.pos(2) = v.P().Z();
         
-//        if (v.vcg::vertex::EmptyCore<CUsedTypesO>::HasTexCoord())
-//        {
-//            //        v.T().U();
-//            //        v.T().V();
-//        }
+        if (v.vcg::vertex::EmptyCore<CUsedTypesO>::HasColor())
+        {
+            satV.color(0) = v.C().X();
+            satV.color(1) = v.C().Y();
+            satV.color(2) = v.C().Z();
+            satV.color(3) = v.C().W();
+        } else
+        {
+            satV.color(0) = satV.color(1) = satV.color(2) = satV.color(3) = 1.0f;
+        }
+        if (v.vcg::vertex::EmptyCore<CUsedTypesO>::HasTexCoord())
+        {
+            satV.uv(0) = v.T().U();
+            satV.uv(1) = v.T().V();
+        } else
+        {
+            satV.uv(0) = satV.uv(1) = 0.0f;
+        }
         
         mesh.verts.push_back(satV);
     }
@@ -96,6 +109,9 @@ MeshModel* SADataUtil::addMeshToDoc(void* meshDocumentPtr, void* glAreaV, const 
         if (mesh->withColor)
         {
             wv.C() = vcg::Point4<unsigned char>(rv.color(0) * 255, rv.color(1) * 255, rv.color(2) * 255, rv.color(3) * 255);
+        } else
+        {
+            wv.C() = vcg::Point4<unsigned char>(255, 255, 255, 255);
         }
     }
     
