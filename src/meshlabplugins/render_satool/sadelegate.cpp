@@ -84,19 +84,21 @@ MeshModel* SADataUtil::addMeshToDoc(void* meshDocumentPtr, void* glAreaV, const 
     int mask = 0;
     mask |= vcg::tri::io::Mask::IOM_VERTQUALITY;
     mask |= vcg::tri::io::Mask::IOM_FACEQUALITY;
-    if (mesh->withColor)
+    if (mesh->withColor || (mesh->syncDisplayMesh != nullptr && mesh->syncDisplayMesh->withColor))
     {
         mask |= vcg::tri::io::Mask::IOM_VERTCOLOR;
     }
     
     int vertexCount = mesh->verts.size();
-    omesh.vert.reserve(vertexCount);
+    int syncDisplayVertexCount = mesh->syncDisplayMesh != nullptr ? mesh->syncDisplayMesh->verts.size() : 0;
+    omesh.vert.reserve(vertexCount  + syncDisplayVertexCount);
     int triangleCount = 0;
+    int syncDisplayTriangleCount = mesh->syncDisplayMesh != nullptr ? mesh->syncDisplayMesh->faces.size() : 0;
     for (int i = 0, isize = mesh->faces.size(); i < isize; i++)
     {
         triangleCount += (mesh->faces[i].count - 2);
     }
-    omesh.face.reserve(triangleCount);
+    omesh.face.reserve(triangleCount + syncDisplayTriangleCount);
     
     vcg::tri::Allocator<CMeshO>::AddVertices(omesh, vertexCount);
     for (int i = 0; i < vertexCount; i++)
@@ -115,6 +117,22 @@ MeshModel* SADataUtil::addMeshToDoc(void* meshDocumentPtr, void* glAreaV, const 
         }
     }
     
+    for (int i = 0; i < syncDisplayVertexCount; i++)
+    {
+        CVertexO& wv = omesh.vert[i + vertexCount];
+        const sat::Vertex& rv = mesh->syncDisplayMesh->verts[i];
+        wv.P() = CMeshO::CoordType(rv.pos(0), rv.pos(1), rv.pos(2));
+        // aka vcg::Point3<float>;
+
+        if (mesh->syncDisplayMesh->withColor)
+        {
+            wv.C() = vcg::Point4<unsigned char>(rv.color(0) * 255, rv.color(1) * 255, rv.color(2) * 255, rv.color(3) * 255);
+        } else
+        {
+            wv.C() = vcg::Point4<unsigned char>(255, 255, 255, 255);
+        }
+    }
+    
     for (int i = 0, isize = mesh->faces.size(); i < isize; i++)
     {
         const sat::Face& rf = mesh->faces[i];
@@ -125,6 +143,15 @@ MeshModel* SADataUtil::addMeshToDoc(void* meshDocumentPtr, void* glAreaV, const 
             CVertexO* v2 = &(omesh.vert[rf.idx[j]]);
             vcg::tri::Allocator<CMeshO>::AddFace(omesh, v0, v1, v2);
         }
+    }
+    
+    for (int i = 0; i < syncDisplayTriangleCount; i++)
+    {
+        const sat::Face& f = mesh->syncDisplayMesh->faces[i];
+        CVertexO* v0 = &(omesh.vert[vertexCount + f.idx[0]]);
+        CVertexO* v1 = &(omesh.vert[vertexCount + f.idx[1]]);
+        CVertexO* v2 = &(omesh.vert[vertexCount + f.idx[2]]);
+        vcg::tri::Allocator<CMeshO>::AddFace(omesh, v0, v1, v2);
     }
     
     MeshModel* newMM = md.addNewMesh(omesh, name, false);
