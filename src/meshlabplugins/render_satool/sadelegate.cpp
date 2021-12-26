@@ -100,7 +100,7 @@ MeshModel* SADataUtil::addMeshToDoc(void* meshDocumentPtr, void* glAreaV, const 
     }
     omesh.face.reserve(triangleCount + syncDisplayTriangleCount);
     
-    vcg::tri::Allocator<CMeshO>::AddVertices(omesh, vertexCount);
+    vcg::tri::Allocator<CMeshO>::AddVertices(omesh, vertexCount + syncDisplayVertexCount);
     for (int i = 0; i < vertexCount; i++)
     {
         CVertexO& wv = omesh.vert[i];

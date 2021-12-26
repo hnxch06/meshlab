@@ -44,6 +44,7 @@ SADialog::SADialog(QGLWidget* gla, QWidget *parent)
     connect(ui->selectWorkFlowJobTreeWidget, SIGNAL(itemPressed(QTreeWidgetItem * , int  )) , this, SLOT(jobDetailClicked(QTreeWidgetItem * , int ) ) );
     
     mFrameTimeID = startTimer(16);
+    sat::DisplayManager::getInstance()->initInMainThread();
 }
 
 SADialog::~SADialog()
@@ -82,6 +83,8 @@ void SADialog::initSupportWorkFlow()
 
 void SADialog::timerEvent(QTimerEvent *)
 {
+    sat::DisplayManager::getInstance()->mainThreadRelease();
+    
     std::shared_ptr<sat::WorkFlow> displaying = sat::DisplayManager::getInstance()->getDisplayingWorkFlow();
     if (displaying != nullptr && displaying->getAndResetStatusChangeFlag())
     {
