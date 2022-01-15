@@ -32,7 +32,7 @@ sat::Model* SADataUtil::convertMeshFromMeshlabToSAGeo(MeshModel* meshModel)
             satV.color(3) = v.C().W();
         } else
         {
-            satV.color(0) = satV.color(1) = satV.color(2) = satV.color(3) = 1.0f;
+            satV.color.setOnes();
         }
         if (v.vcg::vertex::EmptyCore<CUsedTypesO>::HasTexCoord())
         {
@@ -40,7 +40,18 @@ sat::Model* SADataUtil::convertMeshFromMeshlabToSAGeo(MeshModel* meshModel)
             satV.uv(1) = v.T().V();
         } else
         {
-            satV.uv(0) = satV.uv(1) = 0.0f;
+            satV.uv.setZero();
+        }
+        
+        if (v.vcg::vertex::EmptyCore<CUsedTypesO>::HasNormal())
+        {
+            satV.normal(0) = v.N().X();
+            satV.normal(1) = v.N().Y();
+            satV.normal(2) = v.N().Z();
+            satV.normal.normalize();
+        } else
+        {
+            satV.normal.setZero();
         }
         
         mesh.verts.push_back(satV);
