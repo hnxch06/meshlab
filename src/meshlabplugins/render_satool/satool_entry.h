@@ -14,6 +14,9 @@ class SAToolRenderPlugin : public QObject, public RenderPlugin {
 public:
     SAToolRenderPlugin();
     virtual ~SAToolRenderPlugin(){}
+    
+    void timerEvent(QTimerEvent *);
+    
 	QString pluginName() const;
 	
     bool isSupported() { return true; }
@@ -33,6 +36,8 @@ private:
     SADialog* saDialog;
     QList <QAction *> actionList;
     void* mainWindow;
+    
+    int mInitTimer;
 };
 
 #endif

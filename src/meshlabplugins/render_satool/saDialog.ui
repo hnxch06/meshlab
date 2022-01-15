@@ -29,7 +29,7 @@
                                     <enum>Qt::LeftToRight</enum>
                                 </property>
                                 <property name="text">
-                                    <string>If ExecuteFrame: </string>
+                                    <string>PauseFrame: </string>
                                 </property>
                                 <property name="checked">
                                     <bool>true</bool>
@@ -68,6 +68,28 @@
                                 </property>
                                 <property name="text">
                                     <string>Pause</string>
+                                </property>
+                                <property name="font">
+                                    <font>
+                                        <family>Courier</family>
+                                        <pointsize>9</pointsize>
+                                    </font>
+                                </property>
+                                <property name="enabled">
+                                    <bool>true</bool>
+                                </property>
+                            </widget>
+                        </item>
+                        <item>
+                            <widget class="QPushButton" name="debugButton">
+                                <property name="sizePolicy">
+                                    <sizepolicy hsizetype="Expanding" vsizetype="Expanding">
+                                        <horstretch>0</horstretch>
+                                        <verstretch>1</verstretch>
+                                    </sizepolicy>
+                                </property>
+                                <property name="text">
+                                    <string>Debug</string>
                                 </property>
                                 <property name="font">
                                     <font>

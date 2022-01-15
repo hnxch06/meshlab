@@ -41,6 +41,7 @@ SADialog::SADialog(QGLWidget* gla, QWidget *parent)
     connect(ui->workFlowTreeWidget, SIGNAL(itemCollapsed(QTreeWidgetItem * )) , this,  SLOT(adaptLayout(QTreeWidgetItem *)));
     connect(ui->frameExecuteCheckBox, SIGNAL(stateChanged(int)), this, SLOT(frameExecuteStateChange(int)));
     connect(ui->resetPauseFrame, SIGNAL(released()), this, SLOT(pauseFrame()));
+    connect(ui->debugButton, SIGNAL(released()), this, SLOT(debugClicked()));
     connect(ui->selectWorkFlowJobTreeWidget, SIGNAL(itemPressed(QTreeWidgetItem * , int  )) , this, SLOT(jobDetailClicked(QTreeWidgetItem * , int ) ) );
     
     mFrameTimeID = startTimer(16);
@@ -116,6 +117,11 @@ void SADialog::frameExecuteStateChange(int state)
             displaying->setPauseInFrame(INT_MAX);
         }
     }
+}
+
+void SADialog::debugClicked()
+{
+    printf("debug clicked\n");
 }
 
 void SADialog::pauseFrame()

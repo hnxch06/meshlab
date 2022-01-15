@@ -34,6 +34,25 @@ SAToolRenderPlugin::SAToolRenderPlugin():saDialog(NULL), mainWindow(NULL)
     qa->setCheckable(false);
     qa->setPriority(QAction::HighPriority);
     actionList << qa;
+    
+    mainWindow = nullptr;
+    mInitTimer = startTimer(4);
+}
+
+void SAToolRenderPlugin::timerEvent(QTimerEvent *)
+{
+    if (this->mainWindow)
+    {
+        MainWindow* mainWin = (MainWindow*)(this->mainWindow);
+        saDialog = new SADialog(mainWin->GLA(), mainWin);
+        saDialog->setAllowedAreas(Qt::LeftDockWidgetArea);
+        saDialog->setSizePolicy(QSizePolicy::MinimumExpanding, QSizePolicy::Minimum);
+        mainWin->addDockWidget(Qt::LeftDockWidgetArea, saDialog);
+        mainWin->GLA()->setRenderer(this, mainWin->GLA()->getCurrentShaderAction());
+        mainWin->GLA()->update();
+        killTimer(mInitTimer);
+        mInitTimer = 0;
+    }
 }
 
 QString SAToolRenderPlugin::pluginName() const
