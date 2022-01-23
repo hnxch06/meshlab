@@ -10,8 +10,10 @@
 #include <QGLWidget>
 #include <QCheckBox>
 #include <QPushButton>
+#include <stdlib.h>
 #include "MeshLabWorkFlow.h"
 #include "sadelegate.h"
+#include "util/SADebugUtil.h"
 
 #define DECFACTOR 100000.0f
 
@@ -41,15 +43,19 @@ SADialog::SADialog(QGLWidget* gla, QWidget *parent)
     connect(ui->workFlowTreeWidget, SIGNAL(itemCollapsed(QTreeWidgetItem * )) , this,  SLOT(adaptLayout(QTreeWidgetItem *)));
     connect(ui->frameExecuteCheckBox, SIGNAL(stateChanged(int)), this, SLOT(frameExecuteStateChange(int)));
     connect(ui->resetPauseFrame, SIGNAL(released()), this, SLOT(pauseFrame()));
+    connect(ui->savePieceButton, SIGNAL(released()), this, SLOT(saveDisplayingFrame()));
     connect(ui->debugButton, SIGNAL(released()), this, SLOT(debugClicked()));
     connect(ui->selectWorkFlowJobTreeWidget, SIGNAL(itemPressed(QTreeWidgetItem * , int  )) , this, SLOT(jobDetailClicked(QTreeWidgetItem * , int ) ) );
     
     mFrameTimeID = startTimer(16);
     sat::DisplayManager::getInstance()->initInMainThread();
+    
+    loadConfig();
 }
 
 SADialog::~SADialog()
 {
+    saveConfig();
     sat::DisplayManager::getInstance()->removeWorkFlowChangedListener(this);
     killTimer(mFrameTimeID);
     
@@ -57,6 +63,75 @@ SADialog::~SADialog()
     {
         delete ui;
         ui = NULL;
+    }
+}
+
+void SADialog::saveConfig()
+{
+    const char* homeDir = getenv("HOME");
+    if (homeDir != NULL)
+    {
+        char configPath[128] = {0};
+        sprintf(configPath, "%s/.satool_display_config.txt", homeDir);
+        FILE* configFile = fopen(configPath, "w");
+        if (configFile == NULL) return;
+        
+        char line[256] = {0};
+        const char* spPath = ui->pieceSavePath->text().trimmed().toUtf8();
+        if (spPath != NULL && strlen(spPath) > 0)
+        {
+            sprintf(line, "sp=%s\n", spPath);
+            fwrite(line, strlen(line), 1, configFile);
+        }
+        const char* fet = ui->frameExecuteText->text().trimmed().toUtf8();
+        if (fet != NULL && strlen(fet) > 0)
+        {
+            sprintf(line, "fet=%s\n", fet);
+            fwrite(line, strlen(line), 1, configFile);
+        }
+        if (ui->frameExecuteCheckBox->isChecked())
+        {
+            fwrite("fecb=1\n", strlen("fecb=1\n"), 1, configFile);
+        }
+        fclose(configFile);
+    }
+}
+void SADialog::loadConfig()
+{
+    const char* homeDir = getenv("HOME");
+    if (homeDir != NULL)
+    {
+        char configPath[128] = {0};
+        sprintf(configPath, "%s/.satool_display_config.txt", homeDir);
+        FILE* configFile = fopen(configPath, "r");
+        if (configFile == NULL) return;
+        
+        char buf[1024];
+        while (fgets(buf, sizeof(buf), configFile) != NULL)
+        {
+            if (buf[0] == '/') continue;
+            std::string bufTmp = buf;
+            auto pos = bufTmp.find_first_of("=");
+            if (pos == std::string::npos) continue;
+            std::string key = bufTmp.substr(0, pos);
+            std::string value = bufTmp.substr(pos + 1);
+            if (key == "sp") {
+                ui->pieceSavePath->setText(tr(value.c_str()));
+            } else if (key == "fet")
+            {
+                ui->frameExecuteText->setText(tr(value.c_str()));
+            } else if (key == "fecb")
+            {
+                if (value.length() > 0 && value.at(0) == '1')
+                {
+                    ui->frameExecuteCheckBox->setChecked(true);
+                } else
+                {
+                    ui->frameExecuteCheckBox->setChecked(false);
+                }
+            }
+        }
+        fclose(configFile);
     }
 }
 
@@ -130,6 +205,26 @@ void SADialog::pauseFrame()
     if (displaying != nullptr && displaying->getStatus() == sat::WorkFlow::Status::EXECUTING)
     {
         displaying->setPauseInFrame(1);
+    }
+}
+
+void SADialog::saveDisplayingFrame()
+{
+    std::shared_ptr<sat::WorkFlow> workFlow = sat::DisplayManager::getInstance()->getDisplayingWorkFlow();
+    const sat::Job* job = workFlow.get() ? workFlow->viewingJob() : NULL;
+    const sat::DisplayFrame* displayFrame = job != NULL ? job->getDisplayFrame() : NULL;
+    if (displayFrame)
+    {
+        const char* savePath = ui->pieceSavePath->text().trimmed().toUtf8();
+        if (savePath == NULL || strlen(savePath) == 0) return;
+        
+        if (displayFrame->type == DisplayType_Model)
+        {
+            sat::debug_write_model(displayFrame->model, savePath);
+        } else if (displayFrame->type == DisplayType_Mesh)
+        {
+            sat::debug_write_mesh(*(displayFrame->mesh), savePath);
+        }
     }
 }
 

@@ -82,12 +82,15 @@ private:
     
 private:
     void updateTreeWidgetSizes(void* tree);
+    void saveConfig();
+    void loadConfig();
 
 private slots:
     void workFlowClicked(QTreeWidgetItem * , int );
     void adaptLayout(QTreeWidgetItem * item);
     void frameExecuteStateChange(int state);
     void pauseFrame();
+    void saveDisplayingFrame();
     void debugClicked();
     void jobDetailClicked(QTreeWidgetItem * , int );
     
