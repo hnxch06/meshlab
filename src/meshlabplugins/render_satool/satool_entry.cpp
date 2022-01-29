@@ -17,6 +17,7 @@
 #include "../../meshlab/mainwindow.h"
 #include "../../meshlab/glarea.h"
 #include "sadelegate.h"
+#include "SASyncDisplay.h"
 
 #include <functional>
 #include "display/Display.h"
@@ -37,6 +38,9 @@ SAToolRenderPlugin::SAToolRenderPlugin():saDialog(NULL), mainWindow(NULL)
     
     mainWindow = nullptr;
     mInitTimer = startTimer(4);
+    
+    std::function<void(const char*)> fn = std::bind(&SAToolRenderPlugin::logInConsole, this, std::placeholders::_1);
+    sat::saCoreSyncLog = fn;
 }
 
 void SAToolRenderPlugin::timerEvent(QTimerEvent *)
@@ -50,6 +54,7 @@ void SAToolRenderPlugin::timerEvent(QTimerEvent *)
         mainWin->addDockWidget(Qt::LeftDockWidgetArea, saDialog);
         mainWin->GLA()->setRenderer(this, mainWin->GLA()->getCurrentShaderAction());
         mainWin->GLA()->update();
+        this->setLog(&(mainWin->meshDoc()->Log));
         killTimer(mInitTimer);
         mInitTimer = 0;
     }
@@ -68,6 +73,12 @@ QList<QAction *> SAToolRenderPlugin::actions()
 void SAToolRenderPlugin::setMainWindow(void* mainWindow)
 {
     this->mainWindow = mainWindow;
+}
+
+void SAToolRenderPlugin::logInConsole(const char* msg)
+{
+    std::string cMsg = msg;
+    MeshLabPluginLogger::log(GLLogStream::SYSTEM, cMsg);
 }
 
 void SAToolRenderPlugin::setFrameDocument(MeshDocument &md, MLSceneGLSharedDataContext::PerMeshRenderingDataMap&mp, GLArea *gla)
@@ -135,6 +146,8 @@ void SAToolRenderPlugin::init(QAction *a, MeshDocument &md, MLSceneGLSharedDataC
             break;
         }
     }
+    
+    this->setLog(&md.Log);
     
     if (this->mainWindow != nullptr)
     {

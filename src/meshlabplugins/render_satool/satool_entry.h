@@ -6,7 +6,7 @@
 #include "saDialog.h"
 
 
-class SAToolRenderPlugin : public QObject, public RenderPlugin {
+class SAToolRenderPlugin : public QObject, public RenderPlugin, virtual public MeshLabPluginLogger {
     Q_OBJECT
     MESHLAB_PLUGIN_IID_EXPORTER(RENDER_PLUGIN_IID)
     Q_INTERFACES(RenderPlugin)
@@ -31,6 +31,7 @@ public:
     void setFrameDocument( MeshDocument &, MLSceneGLSharedDataContext::PerMeshRenderingDataMap& mp, GLArea *);
     bool hasCustomRenderContent();
     unsigned int hasSpecifyRenderModel(MeshDocument& md, GLArea* glarea);
+    void logInConsole(const char* msg);
     
 private:
     SADialog* saDialog;
