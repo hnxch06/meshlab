@@ -91,6 +91,11 @@ MeshModel* SADataUtil::addMeshToDoc(void* meshDocumentPtr, void* glAreaV, const 
     
     CMeshO omesh;
     omesh.Clear();
+    omesh.vert.EnableTexCoord();
+    if (mesh->withColor || (mesh->syncDisplayMesh != NULL && mesh->syncDisplayMesh->withColor))
+    {
+        omesh.vert.EnableColor();
+    }
     
     int mask = 0;
     mask |= vcg::tri::io::Mask::IOM_VERTQUALITY;
@@ -99,6 +104,8 @@ MeshModel* SADataUtil::addMeshToDoc(void* meshDocumentPtr, void* glAreaV, const 
     {
         mask |= vcg::tri::io::Mask::IOM_VERTCOLOR;
     }
+    mask |= vcg::tri::io::Mask::IOM_VERTCOORD;
+    mask |= vcg::tri::io::Mask::IOM_VERTTEXCOORD;
     
     int vertexCount = mesh->verts.size();
     int syncDisplayVertexCount = mesh->syncDisplayMesh != nullptr ? mesh->syncDisplayMesh->verts.size() : 0;
@@ -118,6 +125,7 @@ MeshModel* SADataUtil::addMeshToDoc(void* meshDocumentPtr, void* glAreaV, const 
         const sat::Vertex& rv = mesh->verts[i];
         wv.P() = CMeshO::CoordType(rv.pos(0), rv.pos(1), rv.pos(2));
         // aka vcg::Point3<float>;
+        wv.T() = vcg::TexCoord2<float, 1>(rv.uv(0), rv.uv(1));
 
         if (mesh->withColor)
         {
@@ -134,6 +142,7 @@ MeshModel* SADataUtil::addMeshToDoc(void* meshDocumentPtr, void* glAreaV, const 
         const sat::Vertex& rv = mesh->syncDisplayMesh->verts[i];
         wv.P() = CMeshO::CoordType(rv.pos(0), rv.pos(1), rv.pos(2));
         // aka vcg::Point3<float>;
+        wv.T() = vcg::TexCoord2<float, 1>(rv.uv(0), rv.uv(1));
 
         if (mesh->syncDisplayMesh->withColor)
         {
