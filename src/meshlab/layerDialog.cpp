@@ -671,8 +671,8 @@ void LayerDialog::updateTable(const MLSceneGLSharedDataContext::PerMeshRendering
 			itms.push_back(item);
 			//Adding default annotations
 		}
-		else
-			throw MLException("Something bad happened! Mesh id has not been found in the rendermapmode map.");
+//		else
+//			throw MLException("Something bad happened! Mesh id has not been found in the rendermapmode map.");
 	}
 	_docitem->addChildren(itms);
 

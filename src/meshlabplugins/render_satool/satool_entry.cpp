@@ -122,7 +122,9 @@ unsigned int SAToolRenderPlugin::hasSpecifyRenderModel(MeshDocument& md, GLArea*
             const_cast<sat::DisplayFrame*>(frame)->userData = frame->type == DisplayType_Model ? (void*)(SADataUtil::addMeshToDoc(&md, glArea, frame->model, frame->frameName.length() > 0 ? frame->frameName.c_str() : "sat_autogen_unnamed")) : (void*)(SADataUtil::addMeshToDoc(&md, glArea, frame->mesh, frame->frameName.length() > 0 ? frame->frameName.c_str() : "sat_autogen_unnamed"));
             
             std::function<void(void*)> fn = [mdPtr = &md](void* userData){
-                SADataUtil::removeMeshFromDoc(mdPtr, (MeshModel*)userData);
+                sat::DisplayManager::getInstance()->releaseInMainThread([mdPtr = mdPtr, userData = userData]{
+                    SADataUtil::removeMeshFromDoc(mdPtr, (MeshModel*)userData);
+                });
             };
             const_cast<sat::DisplayFrame*>(frame)->userDataReleaseFn = fn;
         }

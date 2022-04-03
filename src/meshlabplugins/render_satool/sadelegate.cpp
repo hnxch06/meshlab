@@ -92,10 +92,10 @@ MeshModel* SADataUtil::addMeshToDoc(void* meshDocumentPtr, void* glAreaV, const 
     CMeshO omesh;
     omesh.Clear();
     omesh.vert.EnableTexCoord();
-    if (mesh->withColor || (mesh->syncDisplayMesh != NULL && mesh->syncDisplayMesh->withColor))
-    {
-        omesh.vert.EnableColor();
-    }
+//    if (mesh->withColor || (mesh->syncDisplayMesh != NULL && mesh->syncDisplayMesh->withColor))
+//    {
+//        omesh.vert.EnableColor();
+//    }
     
     int mask = 0;
     mask |= vcg::tri::io::Mask::IOM_VERTQUALITY;
@@ -106,6 +106,7 @@ MeshModel* SADataUtil::addMeshToDoc(void* meshDocumentPtr, void* glAreaV, const 
     }
     mask |= vcg::tri::io::Mask::IOM_VERTCOORD;
     mask |= vcg::tri::io::Mask::IOM_VERTTEXCOORD;
+    mask |= vcg::tri::io::Mask::IOM_WEDGTEXCOORD;
     
     int vertexCount = mesh->verts.size();
     int syncDisplayVertexCount = mesh->syncDisplayMesh != nullptr ? mesh->syncDisplayMesh->verts.size() : 0;
@@ -117,6 +118,7 @@ MeshModel* SADataUtil::addMeshToDoc(void* meshDocumentPtr, void* glAreaV, const 
         triangleCount += (mesh->faces[i].count - 2);
     }
     omesh.face.reserve(triangleCount + syncDisplayTriangleCount);
+    omesh.face.EnableWedgeTexCoord();
     
     vcg::tri::Allocator<CMeshO>::AddVertices(omesh, vertexCount + syncDisplayVertexCount);
     for (int i = 0; i < vertexCount; i++)
@@ -161,7 +163,19 @@ MeshModel* SADataUtil::addMeshToDoc(void* meshDocumentPtr, void* glAreaV, const 
             CVertexO* v0 = &(omesh.vert[rf.idx[0]]);
             CVertexO* v1 = &(omesh.vert[rf.idx[j - 1]]);
             CVertexO* v2 = &(omesh.vert[rf.idx[j]]);
-            vcg::tri::Allocator<CMeshO>::AddFace(omesh, v0, v1, v2);
+            auto iter = vcg::tri::Allocator<CMeshO>::AddFace(omesh, v0, v1, v2);
+            
+            iter->WT(0).N() = 0;
+            iter->WT(0).U() = v0->T().U();
+            iter->WT(0).V() = v0->T().V();
+            
+            iter->WT(1).N() = 0;
+            iter->WT(1).U() = v1->T().U();
+            iter->WT(1).V() = v1->T().V();
+            
+            iter->WT(2).N() = 0;
+            iter->WT(2).U() = v2->T().U();
+            iter->WT(2).V() = v2->T().V();
         }
     }
     
@@ -171,7 +185,19 @@ MeshModel* SADataUtil::addMeshToDoc(void* meshDocumentPtr, void* glAreaV, const 
         CVertexO* v0 = &(omesh.vert[vertexCount + f.idx[0]]);
         CVertexO* v1 = &(omesh.vert[vertexCount + f.idx[1]]);
         CVertexO* v2 = &(omesh.vert[vertexCount + f.idx[2]]);
-        vcg::tri::Allocator<CMeshO>::AddFace(omesh, v0, v1, v2);
+        auto iter = vcg::tri::Allocator<CMeshO>::AddFace(omesh, v0, v1, v2);
+        
+        iter->WT(0).N() = 0;
+        iter->WT(0).U() = v0->T().U();
+        iter->WT(0).V() = v0->T().V();
+        
+        iter->WT(1).N() = 0;
+        iter->WT(1).U() = v1->T().U();
+        iter->WT(1).V() = v1->T().V();
+        
+        iter->WT(2).N() = 0;
+        iter->WT(2).U() = v2->T().U();
+        iter->WT(2).V() = v2->T().V();
     }
     
     MeshModel* newMM = md.addNewMesh(omesh, name, false);

@@ -368,10 +368,12 @@ bool MeshDocument::delMesh(unsigned int id)
 	else if (meshList.empty())
 		setCurrentMesh(-1);
 
-	meshList.erase(pos);
-
+    (*pos).cm.vn = 0;
+    
 	emit meshSetChanged();
 	emit meshRemoved(id);
+    
+    meshList.erase(pos);
 	return true;
 }
 
