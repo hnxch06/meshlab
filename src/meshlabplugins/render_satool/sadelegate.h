@@ -10,7 +10,7 @@
 #include <QSlider>
 #include <QSignalMapper>
 
-#include "Model/Geometory.h"
+#include "Model/Geometry.h"
 #include "display/Display.h"
 
 class GLArea;
